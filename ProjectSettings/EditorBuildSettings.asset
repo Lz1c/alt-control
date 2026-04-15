@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/SampleScene.unity
+    guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 1
+    path: Assets/Invector-3rdPersonController/Basic Locomotion/DemoScenes/Invector_BasicLocomotion.unity
+    guid: 12a4d75da2db4d3439c09e07c73a85b2
+  - enabled: 1
+    path: Assets/Invector-3rdPersonController/Melee Combat/DemoScenes/Invector_MeleeCombat.unity
+    guid: d6abe4b16f34f8e4088b2bb3b1d3a3c5
+  m_configObjects: {}
