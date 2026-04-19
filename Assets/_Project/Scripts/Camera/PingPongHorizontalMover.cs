@@ -9,7 +9,8 @@ public class PingPongHorizontalMover : MonoBehaviour
     [SerializeField] private bool useLocalPosition = true;
 
     private Vector3 startPosition;
-    private float elapsedTime;
+    private float currentOffset;
+    private float direction = 1f;
 
     private void Start()
     {
@@ -18,15 +19,40 @@ public class PingPongHorizontalMover : MonoBehaviour
 
     private void OnEnable()
     {
-        elapsedTime = 0f;
+        currentOffset = 0f;
+        direction = 1f;
     }
 
     private void Update()
     {
-        elapsedTime += Time.deltaTime * Mathf.Max(0f, moveSpeed);
-        float offset = Mathf.Sin(elapsedTime) * moveDistance;
-        Vector3 nextPosition = startPosition + Vector3.right * offset;
+        float distance = Mathf.Max(0f, moveDistance);
+        float speed = Mathf.Max(0f, moveSpeed);
 
+        if (distance <= 0f || speed <= 0f)
+        {
+            ApplyPosition(startPosition);
+            return;
+        }
+
+        currentOffset += direction * speed * Time.deltaTime;
+
+        if (currentOffset > distance)
+        {
+            currentOffset = distance - (currentOffset - distance);
+            direction = -1f;
+        }
+        else if (currentOffset < -distance)
+        {
+            currentOffset = -distance + (-distance - currentOffset);
+            direction = 1f;
+        }
+
+        Vector3 nextPosition = startPosition + Vector3.right * currentOffset;
+        ApplyPosition(nextPosition);
+    }
+
+    private void ApplyPosition(Vector3 nextPosition)
+    {
         if (useLocalPosition)
         {
             transform.localPosition = nextPosition;

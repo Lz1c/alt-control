@@ -144,7 +144,8 @@ public class CAMPhotoCapture : MonoBehaviour
             : CaptureCameraPosition();
         CAMMotionBlurSubject[] motionSubjects = CAMMotionBlurSubject.GetActiveSubjectsSnapshot();
         CAMMotionBlurSubject.SubjectSnapshot[] startSubjectSnapshots = CAMMotionBlurSubject.CaptureSnapshots(motionSubjects);
-
+        int captureWidth = Mathf.Max(1, Mathf.RoundToInt(Screen.width * captureResolutionScale));
+        int captureHeight = Mathf.Max(1, Mathf.RoundToInt(Screen.height * captureResolutionScale));
         float exposureDuration = motionBlurController ? motionBlurController.ExposureDuration : (settings ? settings.ShutterSpeed : 0f);
         if (exposureDuration > Time.deltaTime)
         {
@@ -153,8 +154,6 @@ public class CAMPhotoCapture : MonoBehaviour
 
         yield return new WaitForEndOfFrame();
 
-        int captureWidth = Mathf.Max(1, Mathf.RoundToInt(Screen.width * captureResolutionScale));
-        int captureHeight = Mathf.Max(1, Mathf.RoundToInt(Screen.height * captureResolutionScale));
         Quaternion endRotation = motionBlurController
             ? motionBlurController.CaptureCameraRotation(targetCamera)
             : CaptureCameraRotation();

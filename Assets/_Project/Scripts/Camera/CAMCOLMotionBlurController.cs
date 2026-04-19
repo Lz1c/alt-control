@@ -8,12 +8,11 @@ public class CAMCOLMotionBlurController : MonoBehaviour
     private const float SidewaysBlurMetersForFullStrength = 0.5f;
     private const float VerticalBlurMetersForFullStrength = 0.5f;
     private const float RollDegreesForFullStrength = 12f;
-    private const float CompensationStrength = 0.35f;
+    private const float CompensationStrength = 0.45f;
     private const int MaxSubjectSamples = 8;
-    private const float SubjectPixelsForFullBlur = 64f;
-    private const float SubjectFeather = 0.25f;
+    private const float SubjectFeather = 0.3f;
     private const float SubjectBoundsScale = 1f;
-    private const float SubjectMotionExpansion = 0.5f;
+    private const float SubjectMotionExpansion = 0.7f;
 
     public struct LocalMotionBlurSample
     {
@@ -28,6 +27,10 @@ public class CAMCOLMotionBlurController : MonoBehaviour
     [Tooltip("Scene-level simulated camera data source. This can live on a separate controller object.")]
     [SerializeField] private CAMCOLCameraSettings settings;
 
+    [Header("Subject Blur Tuning")]
+    [SerializeField] private float subjectPixelsForFullBlur = 20f;
+    [SerializeField] private float subjectMotionSensitivity = 2.5f;
+
     private Material photoProcessingMaterial;
     private readonly List<LocalMotionBlurSample> subjectSampleBuffer = new List<LocalMotionBlurSample>(MaxSubjectSamples);
 
@@ -41,6 +44,8 @@ public class CAMCOLMotionBlurController : MonoBehaviour
     private void OnValidate()
     {
         EnsureReferences();
+        subjectPixelsForFullBlur = Mathf.Max(1f, subjectPixelsForFullBlur);
+        subjectMotionSensitivity = Mathf.Max(0.1f, subjectMotionSensitivity);
     }
 
     public Quaternion CaptureCameraRotation(Camera targetCamera)
@@ -103,6 +108,7 @@ public class CAMCOLMotionBlurController : MonoBehaviour
         }
 
         int count = Mathf.Min(subjects.Length, startSnapshots.Length, endSnapshots.Length);
+        float shutterDuration = Mathf.Max(ExposureDuration, 0f);
         for (int i = 0; i < count; i++)
         {
             CAMMotionBlurSubject subject = subjects[i];
@@ -116,19 +122,30 @@ public class CAMCOLMotionBlurController : MonoBehaviour
                 continue;
             }
 
-            if (!TryProjectBounds(targetCamera, startSnapshots[i].WorldBounds, out Vector2 startCenterUv, out Vector2 startHalfSizeUv))
+            Bounds endBounds = endSnapshots[i].WorldBounds;
+            Vector3 velocityWorld = endSnapshots[i].VelocityWorld * (subject.BlurMultiplier * subjectMotionSensitivity);
+            Vector3 worldOffset = velocityWorld * shutterDuration;
+
+            if (worldOffset.sqrMagnitude <= 0.0000001f && startSnapshots[i].IsValid)
+            {
+                worldOffset = endSnapshots[i].WorldBounds.center - startSnapshots[i].WorldBounds.center;
+            }
+
+            Bounds estimatedStartBounds = OffsetBounds(endBounds, -worldOffset);
+
+            if (!TryProjectBounds(targetCamera, estimatedStartBounds, out Vector2 startCenterUv, out Vector2 startHalfSizeUv))
             {
                 continue;
             }
 
-            if (!TryProjectBounds(targetCamera, endSnapshots[i].WorldBounds, out Vector2 endCenterUv, out Vector2 endHalfSizeUv))
+            if (!TryProjectBounds(targetCamera, endBounds, out Vector2 endCenterUv, out Vector2 endHalfSizeUv))
             {
                 continue;
             }
 
             Vector2 motionPixels = new Vector2(
                 (endCenterUv.x - startCenterUv.x) * width,
-                (endCenterUv.y - startCenterUv.y) * height) * subject.BlurMultiplier;
+                (endCenterUv.y - startCenterUv.y) * height);
 
             float magnitude = motionPixels.magnitude;
             if (magnitude < subject.MinimumScreenMotionPixels)
@@ -147,7 +164,7 @@ public class CAMCOLMotionBlurController : MonoBehaviour
                 CenterUv = (startCenterUv + endCenterUv) * 0.5f,
                 HalfSizeUv = halfSizeUv,
                 MotionUv = motionUv,
-                BlendStrength = Mathf.Clamp01(magnitude / SubjectPixelsForFullBlur),
+                BlendStrength = Mathf.Clamp01(magnitude / subjectPixelsForFullBlur),
                 Feather = SubjectFeather
             });
         }
@@ -225,7 +242,7 @@ public class CAMCOLMotionBlurController : MonoBehaviour
 
     private static void ApplyDirectionalCpuBlur(Texture2D photo, Vector2 motionPixels)
     {
-        int radius = Mathf.Clamp(Mathf.RoundToInt(motionPixels.magnitude * 0.15f), 0, 8);
+        int radius = Mathf.Clamp(Mathf.RoundToInt(motionPixels.magnitude * 0.22f), 0, 12);
         if (radius <= 0)
         {
             return;
@@ -271,7 +288,7 @@ public class CAMCOLMotionBlurController : MonoBehaviour
 
     private static void ApplyRadialCpuBlur(Texture2D photo, float radialStrength)
     {
-        int radius = Mathf.Clamp(Mathf.RoundToInt(Mathf.Abs(radialStrength) * 8f), 0, 8);
+        int radius = Mathf.Clamp(Mathf.RoundToInt(Mathf.Abs(radialStrength) * 10f), 0, 10);
         if (radius <= 0)
         {
             return;
@@ -320,7 +337,7 @@ public class CAMCOLMotionBlurController : MonoBehaviour
 
     private static void ApplyRotationalCpuBlur(Texture2D photo, float rollStrength)
     {
-        int radius = Mathf.Clamp(Mathf.RoundToInt(Mathf.Abs(rollStrength) * 8f), 0, 8);
+        int radius = Mathf.Clamp(Mathf.RoundToInt(Mathf.Abs(rollStrength) * 10f), 0, 10);
         if (radius <= 0)
         {
             return;
@@ -487,6 +504,12 @@ public class CAMCOLMotionBlurController : MonoBehaviour
         return true;
     }
 
+    private static Bounds OffsetBounds(Bounds bounds, Vector3 offset)
+    {
+        bounds.center += offset;
+        return bounds;
+    }
+
     private static void ApplyLocalizedCpuBlur(Texture2D photo, LocalMotionBlurSample[] subjectSamples)
     {
         if (subjectSamples == null || subjectSamples.Length == 0)
@@ -504,7 +527,7 @@ public class CAMCOLMotionBlurController : MonoBehaviour
         {
             LocalMotionBlurSample sample = subjectSamples[s];
             Vector2 motionPixels = new Vector2(sample.MotionUv.x * width, sample.MotionUv.y * height);
-            int radius = Mathf.Clamp(Mathf.RoundToInt(motionPixels.magnitude * 0.5f), 0, 12);
+            int radius = Mathf.Clamp(Mathf.RoundToInt(motionPixels.magnitude * 0.8f), 0, 18);
             if (radius <= 0)
             {
                 continue;
