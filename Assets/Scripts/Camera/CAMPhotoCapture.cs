@@ -29,6 +29,7 @@ public class CAMPhotoCapture : MonoBehaviour
     [SerializeField] private string fileNamePrefix = "photo";
     [SerializeField] private bool showPreviewAfterCapture = true;
     [SerializeField] private bool hidePreviewDuringCapture = true;
+    [SerializeField] private float captureResolutionScale = 1f;
 
     private bool isCapturing;
     private Texture2D lastPreviewTexture;
@@ -45,6 +46,12 @@ public class CAMPhotoCapture : MonoBehaviour
         focusController = GetComponent<CAMFocusController>();
         isoController = GetComponent<CAMCOLIsoController>();
         motionBlurController = GetComponent<CAMCOLMotionBlurController>();
+        captureResolutionScale = 1f;
+    }
+
+    private void OnValidate()
+    {
+        captureResolutionScale = Mathf.Clamp(captureResolutionScale, 0.25f, 4f);
     }
 
     private void Update()
@@ -135,6 +142,8 @@ public class CAMPhotoCapture : MonoBehaviour
         Vector3 startPosition = motionBlurController
             ? motionBlurController.CaptureCameraPosition(targetCamera)
             : CaptureCameraPosition();
+        CAMMotionBlurSubject[] motionSubjects = CAMMotionBlurSubject.GetActiveSubjectsSnapshot();
+        CAMMotionBlurSubject.SubjectSnapshot[] startSubjectSnapshots = CAMMotionBlurSubject.CaptureSnapshots(motionSubjects);
 
         float exposureDuration = motionBlurController ? motionBlurController.ExposureDuration : (settings ? settings.ShutterSpeed : 0f);
         if (exposureDuration > Time.deltaTime)
@@ -144,8 +153,8 @@ public class CAMPhotoCapture : MonoBehaviour
 
         yield return new WaitForEndOfFrame();
 
-        int captureWidth = Screen.width;
-        int captureHeight = Screen.height;
+        int captureWidth = Mathf.Max(1, Mathf.RoundToInt(Screen.width * captureResolutionScale));
+        int captureHeight = Mathf.Max(1, Mathf.RoundToInt(Screen.height * captureResolutionScale));
         Quaternion endRotation = motionBlurController
             ? motionBlurController.CaptureCameraRotation(targetCamera)
             : CaptureCameraRotation();
@@ -155,7 +164,11 @@ public class CAMPhotoCapture : MonoBehaviour
         Vector4 motionSample = motionBlurController
             ? motionBlurController.CalculateMotionSample(targetCamera, startRotation, endRotation, startPosition, endPosition, captureWidth, captureHeight)
             : Vector4.zero;
-        Texture2D photo = CaptureProcessedPhoto(captureWidth, captureHeight, motionSample);
+        CAMMotionBlurSubject.SubjectSnapshot[] endSubjectSnapshots = CAMMotionBlurSubject.CaptureSnapshots(motionSubjects);
+        CAMCOLMotionBlurController.LocalMotionBlurSample[] subjectMotionSamples = motionBlurController
+            ? motionBlurController.CalculateSubjectMotionSamples(targetCamera, motionSubjects, startSubjectSnapshots, endSubjectSnapshots, captureWidth, captureHeight)
+            : Array.Empty<CAMCOLMotionBlurController.LocalMotionBlurSample>();
+        Texture2D photo = CaptureProcessedPhoto(captureWidth, captureHeight, motionSample, subjectMotionSamples);
 
         string savedPath = SavePhoto(photo);
         Debug.Log($"Saved simulated photo to {savedPath}", this);
@@ -190,38 +203,46 @@ public class CAMPhotoCapture : MonoBehaviour
         IsHalfPressActive = false;
     }
 
-    private Texture2D CaptureProcessedPhoto(int width, int height, Vector4 motionSample)
+    private Texture2D CaptureProcessedPhoto(
+        int width,
+        int height,
+        Vector4 motionSample,
+        CAMCOLMotionBlurController.LocalMotionBlurSample[] subjectMotionSamples)
     {
         RenderTexture sourceRt = CaptureCameraToRenderTexture(width, height);
-        RenderTexture isoRt = isoController ? isoController.ApplyPhotoIso(sourceRt) : sourceRt;
-        RenderTexture processedRt = motionBlurController ? motionBlurController.ApplyPhotoMotionBlur(isoRt, motionSample) : isoRt;
+        RenderTexture motionRt = motionBlurController ? motionBlurController.ApplyPhotoMotionBlur(sourceRt, motionSample, subjectMotionSamples) : sourceRt;
+        RenderTexture isoRt = isoController ? isoController.ApplyPhotoIso(motionRt) : motionRt;
 
-        Texture2D photo = ReadRenderTexture(processedRt, width, height);
+        Texture2D photo = ReadRenderTexture(isoRt, width, height);
 
         if (!isoController)
         {
             Debug.LogWarning($"{nameof(CAMPhotoCapture)} on {name} has no {nameof(CAMCOLIsoController)} reference, so captured photos will not get ISO post-processing.", this);
         }
 
-        if (isoRt == sourceRt)
+        if (motionRt == sourceRt)
+        {
+            motionBlurController?.ApplyCpuFallback(photo, motionSample, subjectMotionSamples);
+        }
+
+        if (isoRt == motionRt)
         {
             isoController?.ApplyCpuFallbackIso(photo);
         }
 
-        if (processedRt == isoRt)
+        if (sourceRt)
         {
-            motionBlurController?.ApplyCpuFallback(photo, motionSample);
+            RenderTexture.ReleaseTemporary(sourceRt);
         }
 
-        RenderTexture.ReleaseTemporary(sourceRt);
-        if (isoRt != sourceRt && isoRt != processedRt)
+        if (motionRt != sourceRt && motionRt != isoRt)
+        {
+            RenderTexture.ReleaseTemporary(motionRt);
+        }
+
+        if (isoRt != sourceRt && isoRt != motionRt)
         {
             RenderTexture.ReleaseTemporary(isoRt);
-        }
-
-        if (processedRt != sourceRt)
-        {
-            RenderTexture.ReleaseTemporary(processedRt);
         }
 
         return photo;

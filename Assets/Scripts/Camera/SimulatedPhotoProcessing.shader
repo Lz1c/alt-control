@@ -27,6 +27,10 @@ Shader "Hidden/Simulated Camera/Photo Processing"
             float4 _NoiseParams;
             float4 _MotionParams;
             float4 _RotationParams;
+            float4 _LocalBlurCenter;
+            float4 _LocalBlurHalfSize;
+            float4 _LocalBlurMotion;
+            float4 _LocalBlurSettings;
             float _NoiseSeed;
 
             float Hash(float2 p)
@@ -88,6 +92,32 @@ Shader "Hidden/Simulated Camera/Photo Processing"
                     color += tex2D(_MainTex, uv + directionalOffset + radialOffset + rollOffset).rgb;
                 }
                 color /= sampleCount;
+
+                float localBlend = saturate(_LocalBlurSettings.z);
+                if (localBlend > 0.0)
+                {
+                    float2 localCenter = _LocalBlurCenter.xy;
+                    float2 localHalfSize = max(_LocalBlurHalfSize.xy, float2(0.0001, 0.0001));
+                    float2 normalizedDistance = abs(uv - localCenter) / localHalfSize;
+                    float boxDistance = max(normalizedDistance.x, normalizedDistance.y);
+                    float feather = max(0.001, saturate(_LocalBlurSettings.y));
+                    float mask = 1.0 - smoothstep(1.0 - feather, 1.0, boxDistance);
+
+                    if (mask > 0.0)
+                    {
+                        float2 localMotion = _LocalBlurMotion.xy;
+                        float localStrength = saturate(_LocalBlurSettings.x);
+                        float3 localColor = 0;
+                        [unroll]
+                        for (int i = 0; i < sampleCount; i++)
+                        {
+                            float t = (i / 8.0) - 0.5;
+                            localColor += tex2D(_MainTex, uv + localMotion * t).rgb;
+                        }
+                        localColor /= sampleCount;
+                        color = lerp(color, localColor, mask * localBlend * localStrength);
+                    }
+                }
 
                 float luminanceNoiseAmount = _NoiseParams.x;
                 float chromaNoiseAmount = _NoiseParams.y;

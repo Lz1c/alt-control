@@ -21,6 +21,12 @@ public class CAMCOLIsoController : MonoBehaviour
     [SerializeField] private CAMCOLCameraSettings settings;
     [SerializeField] private Volume targetVolume;
 
+    [Header("Noise Thresholds")]
+    [SerializeField] private float isoNoiseThreshold = 6400f;
+    [SerializeField] private float shutterNoiseThreshold = 1f;
+    [SerializeField] private float maxSupportedIsoNoise = 25600f;
+    [SerializeField] private float maxSupportedShutterNoise = 8f;
+
     private FilmGrain filmGrain;
     private Material photoProcessingMaterial;
     private bool warnedMissingSettings;
@@ -44,6 +50,10 @@ public class CAMCOLIsoController : MonoBehaviour
 
     private void OnValidate()
     {
+        isoNoiseThreshold = Mathf.Max(BaseIso, isoNoiseThreshold);
+        shutterNoiseThreshold = Mathf.Max(0.0001f, shutterNoiseThreshold);
+        maxSupportedIsoNoise = Mathf.Max(isoNoiseThreshold, maxSupportedIsoNoise);
+        maxSupportedShutterNoise = Mathf.Max(shutterNoiseThreshold, maxSupportedShutterNoise);
         ApplyRealtimeGrain(false);
     }
 
@@ -56,7 +66,7 @@ public class CAMCOLIsoController : MonoBehaviour
 
         float iso = settings ? settings.Iso : BaseIso;
         float shutterSpeed = settings ? settings.ShutterSpeed : BaseShutterSpeed;
-        float noiseAmount = ComputeNoiseAmount(iso, shutterSpeed);
+        float noiseAmount = ComputeNoiseAmount(iso, shutterSpeed, isoNoiseThreshold, shutterNoiseThreshold, maxSupportedIsoNoise, maxSupportedShutterNoise);
         RenderTexture processed = RenderTexture.GetTemporary(source.width, source.height, 0, RenderTextureFormat.ARGB32);
 
         photoProcessingMaterial.SetVector("_NoiseParams", new Vector4(
@@ -75,7 +85,7 @@ public class CAMCOLIsoController : MonoBehaviour
     {
         float iso = settings ? settings.Iso : BaseIso;
         float shutterSpeed = settings ? settings.ShutterSpeed : BaseShutterSpeed;
-        float noiseAmount = ComputeNoiseAmount(iso, shutterSpeed);
+        float noiseAmount = ComputeNoiseAmount(iso, shutterSpeed, isoNoiseThreshold, shutterNoiseThreshold, maxSupportedIsoNoise, maxSupportedShutterNoise);
         float luminanceNoise = LuminanceNoiseAtIso6400 * noiseAmount;
         float chromaNoise = ChromaNoiseAtIso6400 * noiseAmount;
 
@@ -153,7 +163,7 @@ public class CAMCOLIsoController : MonoBehaviour
         filmGrain.response.overrideState = true;
         filmGrain.response.value = GrainResponse;
 
-        float noiseAmount = ComputeNoiseAmount(settings.Iso, settings.ShutterSpeed);
+        float noiseAmount = ComputeNoiseAmount(settings.Iso, settings.ShutterSpeed, isoNoiseThreshold, shutterNoiseThreshold, maxSupportedIsoNoise, maxSupportedShutterNoise);
         filmGrain.type.value = GetGrainType(noiseAmount);
         filmGrain.intensity.value = Mathf.Lerp(0f, GrainIntensityAtIso6400, noiseAmount);
     }
@@ -240,15 +250,29 @@ public class CAMCOLIsoController : MonoBehaviour
         return true;
     }
 
-    private static float ComputeNoiseAmount(float iso, float shutterSpeed)
+    private static float ComputeNoiseAmount(
+        float iso,
+        float shutterSpeed,
+        float isoThreshold,
+        float shutterThreshold,
+        float maxIsoNoise,
+        float maxShutterNoise)
     {
-        float isoStops = Mathf.Log(Mathf.Max(iso, BaseIso) / BaseIso, 2f);
-        float isoRangeStops = Mathf.Log(6400f / BaseIso, 2f);
-        float isoNoise = Mathf.Clamp01(isoStops / isoRangeStops);
+        float isoNoise = 0f;
+        if (iso > isoThreshold)
+        {
+            float isoStops = Mathf.Log(Mathf.Max(iso, isoThreshold) / isoThreshold, 2f);
+            float isoRangeStops = Mathf.Log(maxIsoNoise / isoThreshold, 2f);
+            isoNoise = Mathf.Clamp01(isoRangeStops > 0f ? isoStops / isoRangeStops : 0f);
+        }
 
-        float slowShutterStops = Mathf.Log(Mathf.Max(shutterSpeed, BaseShutterSpeed) / BaseShutterSpeed, 2f);
-        float slowShutterRangeStops = Mathf.Log((1f / 15f) / BaseShutterSpeed, 2f);
-        float shutterNoise = Mathf.Clamp01(slowShutterStops / slowShutterRangeStops);
+        float shutterNoise = 0f;
+        if (shutterSpeed > shutterThreshold)
+        {
+            float slowShutterStops = Mathf.Log(Mathf.Max(shutterSpeed, shutterThreshold) / shutterThreshold, 2f);
+            float slowShutterRangeStops = Mathf.Log(maxShutterNoise / shutterThreshold, 2f);
+            shutterNoise = Mathf.Clamp01(slowShutterRangeStops > 0f ? slowShutterStops / slowShutterRangeStops : 0f);
+        }
 
         return Mathf.Clamp01(Mathf.Pow(isoNoise, GrainCurvePower) + shutterNoise * 0.35f);
     }
