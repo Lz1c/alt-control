@@ -33,7 +33,11 @@
 
 代码：`CAMCOLExposureApplier`。
 
-$$\text{EV}_{100} = \log_2\!\left(\frac{A^2}{T} \cdot \frac{100}{\text{ISO}}\right)$$
+```
+EV100 = log2( (A² / T) × (100 / ISO) )
+```
+
+其中 A = 光圈（f-number），T = 快门速度（秒），ISO = 感光度。
 
 - **基准 EV**：光圈 5.6，快门 1/125，ISO 100。偏离基准的 EV 差值直接变成 `ColorAdjustments.postExposure`（URP Volume）。
 - **夹紧范围**：`postExposure ∈ [-6, +6]`。极端数值不会无限拉高亮度。
