@@ -19,3 +19,4 @@ MemoryCaptures/
 photo/*.png
 
 *.unitypackage
+*.unitypackage.meta
