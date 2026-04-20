@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Grep",
+      "Glob",
+      "Bash(ls *)",
+      "Bash(ls)",
+      "Bash(pwd)",
+      "Bash(wc *)",
+      "Bash(file *)",
+      "Bash(git status)",
+      "Bash(git status *)",
+      "Bash(git log)",
+      "Bash(git log *)",
+      "Bash(git diff)",
+      "Bash(git diff *)",
+      "Bash(git branch)",
+      "Bash(git branch *)",
+      "Bash(git show *)",
+      "Bash(git remote -v)",
+      "Bash(git ls-files *)"
+    ]
+  }
+}

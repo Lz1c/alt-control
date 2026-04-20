@@ -8,6 +8,21 @@ A first-person photo-puzzle/horror game set in Chinese folk / ethnic-minority fo
 
 This is not a cinematic post-processing toy. The whole point is that exposure, motion blur, and noise are *gameplay inputs*, driven from one source of truth (`CAMCOLCameraSettings`) and applied to both realtime preview and the captured photo.
 
+## Design docs (important)
+
+The full game design lives in `doc/` (D&D-rulebook style, Chinese). **When working on gameplay / ghosts / levels / masks / narrative, read the relevant doc first** — don't invent rules that already have decided answers.
+
+- [`doc/README.md`](doc/README.md) — index of all design sections
+- [`doc/00-overview.md`](doc/00-overview.md) — core loop, design pillars
+- [`doc/10-camera-rules.md`](doc/10-camera-rules.md) — camera parameter rules, EV formula, photo judgment (**this mirrors the code numbers; if code changes, update here too**)
+- [`doc/20-office-hub.md`](doc/20-office-hub.md) — office hub systems, progression unlocks
+- [`doc/30-level-design.md`](doc/30-level-design.md) — level structure template
+- [`doc/40-ghost-bestiary.md`](doc/40-ghost-bestiary.md) — ghost cards (Boss + 扰乱) with required data fields
+- [`doc/50-masks-folklore.md`](doc/50-masks-folklore.md) — mask design rules, 五色体系, risk guardrails
+- [`doc/60-levels/`](doc/60-levels/) — per-level entries
+- [`doc/70-narrative.md`](doc/70-narrative.md) — story arcs (mostly TBD)
+- [`doc/90-reference/nuo-masks.md`](doc/90-reference/nuo-masks.md) — **deep research on 傩戏 masks** (300+ lines of folklore / ethnic traditions / game-design translation). Read this when designing ghosts, masks, or culturally-loaded content.
+
 ## Unity setup
 
 - **Editor**: Unity **2022.3.62f3** (LTS). Do not upgrade casually; Invector and several asset packs depend on 2022.3.
