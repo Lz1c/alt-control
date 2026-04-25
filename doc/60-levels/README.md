@@ -18,7 +18,7 @@
 
 新增一关时：
 
-1. 在 `40-ghost-bestiary.md` 里加 Boss 鬼条目（或标记为"复用某鬼"）
-2. 在 `50-masks-folklore.md` 里加对应面具条目（如该鬼戴面具）
-3. 本目录新建 `NN-slug.md`，套模板填
+1. 跑 `/new-ghost boss <名>` 在 `../41-ghosts/` 里建 Boss 鬼条目（或沿用已有鬼的 ID）
+2. 跑 `/new-mask <体系> <名>` 在 `../51-masks/` 里落面具（如该鬼戴面具）
+3. 本目录新建 `NN-slug.md`，套 `../30-level-design.md` 的模板填
 4. 回到本 README 更新列表

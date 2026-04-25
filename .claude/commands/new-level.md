@@ -17,7 +17,7 @@ allowed-tools: "Read Grep Glob Edit Write"
 
 1. **读 `doc/30-level-design.md` § 关卡条目模板**，整段复制作为起点。
 2. **扫 `doc/60-levels/`**，取下一个编号（`01-`、`02-`… —— 不要和现有重复）。
-3. **读 `doc/40-ghost-bestiary.md`**，列出已有的 Boss 鬼 ID 给用户选作为关底，或者允许用户输入一个新的（后续用 `/new-ghost` 填）。
+3. **读 `doc/41-ghosts/README.md`**，列出已有的 Boss 鬼 ID 给用户选作为关底，或者允许用户输入一个新的（后续用 `/new-ghost` 填）。
 4. **问用户最少的必要信息**（一次问一条）：
    - 关底 Boss 鬼 ID（已有 / 新建）
    - 场景地点一句话（古宅 / 戏班旧院 / 山村 / 渔村古祠堂 …）

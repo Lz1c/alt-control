@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Game concept
 
-A first-person photo-puzzle/horror game set in Chinese folk / ethnic-minority folklore. The player hunts ghosts wearing 傩戏 (Nuo opera) masks by **physically aiming a camera model and taking photos**. The core challenge is a **hardcore, parameter-driven simulated camera**: different ghosts require different settings — e.g. fast-moving ones need a fast shutter to avoid motion blur, dim scenes need high ISO but tolerate noise, etc. Photos are real output: rendered through a custom simulation pipeline and saved to disk.
+A first-person photo-puzzle/horror game set in Chinese folk / ethnic-minority folklore. **Ghosts are invisible to the naked eye — only the camera viewfinder reveals them.** Through the lens, a ghost's head appears as a "living" 傩戏 (Nuo opera) mask (recognizably mask-like but biologically distorted). The player hunts ghosts by **physically aiming a camera model and taking photos**; a successful Boss capture freezes the ghost into the corresponding **physical Nuo mask** that drops in-scene, gets picked up, and is hung on the office mask wall (the wall = collection progression). The core challenge is a **hardcore, parameter-driven simulated camera**: different ghosts require different settings — e.g. fast-moving ones need a fast shutter to avoid motion blur, dim scenes need high ISO but tolerate noise, etc. Photos are real output: rendered through a custom simulation pipeline and saved to disk.
 
 This is not a cinematic post-processing toy. The whole point is that exposure, motion blur, and noise are *gameplay inputs*, driven from one source of truth (`CAMCOLCameraSettings`) and applied to both realtime preview and the captured photo.
 
@@ -17,11 +17,71 @@ The full game design lives in `doc/` (D&D-rulebook style, Chinese). **When worki
 - [`doc/10-camera-rules.md`](doc/10-camera-rules.md) — camera parameter rules, EV formula, photo judgment (**this mirrors the code numbers; if code changes, update here too**)
 - [`doc/20-office-hub.md`](doc/20-office-hub.md) — office hub systems, progression unlocks
 - [`doc/30-level-design.md`](doc/30-level-design.md) — level structure template
-- [`doc/40-ghost-bestiary.md`](doc/40-ghost-bestiary.md) — ghost cards (Boss + 扰乱) with required data fields
-- [`doc/50-masks-folklore.md`](doc/50-masks-folklore.md) — mask design rules, 五色体系, risk guardrails
+- [`doc/40-ghost-rules.md`](doc/40-ghost-rules.md) — ghost rules & templates (Boss / 扰乱 two kinds, shared fields)
+- [`doc/41-ghosts/`](doc/41-ghosts/) — individual ghost cards, one md per ghost
+- [`doc/50-mask-rules.md`](doc/50-mask-rules.md) — mask design rules, 五色体系, risk guardrails
+- [`doc/51-masks/`](doc/51-masks/) — individual mask cards, one md per mask
 - [`doc/60-levels/`](doc/60-levels/) — per-level entries
 - [`doc/70-narrative.md`](doc/70-narrative.md) — story arcs (mostly TBD)
 - [`doc/90-reference/nuo-masks.md`](doc/90-reference/nuo-masks.md) — **deep research on 傩戏 masks** (300+ lines of folklore / ethnic traditions / game-design translation). Read this when designing ghosts, masks, or culturally-loaded content.
+- [`doc/plan/`](doc/plan/) — **planning system** (current phase, roadmap, knowledge-lock chain, decisions log, open questions, rules-revisions). Always read [`doc/plan/README.md`](doc/plan/README.md) at the start of a new conversation to know "where we are."
+
+## Design Workflow
+
+The project uses a **vertical-slice cadence** — each level goes design → Unity implementation → playtested verification before the next level starts. The workflow is bookkept in `doc/plan/`.
+
+**To know "where we are" right now**: read [`doc/plan/README.md`](doc/plan/README.md), or run `/next-step`.
+
+**To design a new ghost**:
+1. Use the `ghost-designer` subagent for ideation (returns a markdown card, doesn't write files)
+2. When happy, run `/new-ghost boss|minion <Chinese name>` to materialize the card to `doc/41-ghosts/`
+3. Run `/new-mask <system-slug> <Chinese name>` to extract the mask into `doc/51-masks/`
+
+**To plan a new level**:
+1. Use the `level-planner` subagent (input: level number + chapter + theme + candidate knowledge lock) → it outputs Boss/扰乱 candidates, parameter unlocks, design questions, continuity check
+2. Answer open questions (track them in `doc/plan/open-questions.md`)
+3. Make sure all referenced ghosts/masks are filled
+4. Run `/new-level <slug> <Chinese name> [chapter]` to materialize the level card
+5. Run `/audit-docs` to confirm everything is filled
+6. Run `/lock-level <NN>` to freeze the design and snapshot the rules-layer git SHAs
+7. Implement the level in Unity (use the `unity-mcp-skill` skill for editor ops)
+
+**To change a rule** (`doc/10-camera-rules.md`, `40-ghost-rules.md`, `50-mask-rules.md`, `30-level-design.md`, or camera code):
+1. **Before editing**: open a draft entry in [`doc/plan/rules-revisions.md`](doc/plan/rules-revisions.md). Discuss with the user.
+2. After editing: run `/audit-docs --since-rev` to see which Locked levels / 数值化 ghosts the change affects
+3. For each affected Locked level, decide: (a) accept drift (mark "based on old rules") or (b) unlock → retest → relock. Default: (b)
+4. Archive the draft entry with the actual impact list
+
+## Slash Commands
+
+All in `.claude/commands/`. Listed here so future conversations know they exist.
+
+| Command | What it does |
+|---|---|
+| `/new-ghost [boss\|minion] <name>` | Create a new ghost card in `doc/41-ghosts/`, update indices |
+| `/new-mask <system-slug> <name>` | Create a new mask card in `doc/51-masks/` |
+| `/new-level <slug> <name> [chapter]` | Create a new level card in `doc/60-levels/` |
+| `/audit-docs [--since-rev]` | Read-only audit: completion state of all design docs + camera rules vs. code drift. With `--since-rev`: list Locked levels affected by recent rules changes |
+| `/lock-level <NN>` | Freeze a level for Unity implementation. Validates references, snapshots rules-layer git SHAs, updates `decisions-log.md` |
+| `/next-step` | Read-only: tells the user the next concrete action based on current `doc/plan/` state |
+
+Subagents (also in `.claude/agents/`):
+- `ghost-designer` — fuzzy ghost concept → filled ghost card (markdown only, no file write)
+- `camera-tuner` — translates gameplay intent ↔ concrete camera/ghost numbers
+- `level-planner` — fuzzy level idea → 5-block planning output (parameter unlocks, Boss candidates, 扰乱 candidates, open design questions, continuity check)
+
+## Doc Status Legend
+
+Every ghost / mask / level md should carry one of these markers in its first-line block (or yaml frontmatter):
+
+| Marker | Meaning | Who can change |
+|---|---|---|
+| `⚠️ TBD` | Placeholder / not started | Anyone |
+| `🟡 In-Progress` | Being designed | Current author |
+| `🔒 Locked-for-build` | Frozen, in Unity implementation | Only via `rules-revisions.md` flow |
+| `✅ Shipped` | Implemented and verified | Only via `rules-revisions.md` flow |
+
+`/lock-level` writes the `🔒 Locked` marker plus the rules-layer git SHAs the level depends on. `/audit-docs` parses these markers to compute project completeness.
 
 ## Unity setup
 
