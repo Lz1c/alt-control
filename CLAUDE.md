@@ -25,6 +25,7 @@ The full game design lives in `doc/` (D&D-rulebook style, Chinese). **When worki
 - [`doc/30-level-design.md`](doc/30-level-design.md) — level structure template (**v2 single-level**)
 - [`doc/40-ghost-rules.md`](doc/40-ghost-rules.md) — 影 rules & templates (Boss / 扰乱 two kinds)
 - [`doc/41-ghosts/`](doc/41-ghosts/) — individual 影 cards (v1 cards archived; v2 = 6 new cards)
+- [`doc/45-uncanny.md`](doc/45-uncanny.md) — **uncanny layer rulebook**: SCP-style dread + 1 jumpscare exception, healing tone guardrails
 - [`doc/50-mask-rules.md`](doc/50-mask-rules.md) — ❌ **v1 deprecated** (Nuo mask system cut)
 - [`doc/51-masks/`](doc/51-masks/) — ❌ **v1 deprecated** (empty — no mask collection in v2)
 - [`doc/60-levels/`](doc/60-levels/) — per-level entries (**v2 = single level: `01-shan.md`**)

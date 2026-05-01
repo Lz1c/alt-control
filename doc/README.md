@@ -15,6 +15,7 @@
 | 30 | [level-design.md](30-level-design.md) | **关卡结构**（v2 单关线性登山） | 改关卡模板时 |
 | 40 | [ghost-rules.md](40-ghost-rules.md) | **影规则**：Boss 影 + 扰乱影两种模板、通用字段 | 加新影之前 |
 | 41 | [41-ghosts/](41-ghosts/) | 每只影一个 md（v2 = 6 张；v1 旧 8 张归档） | 查 / 写具体影 |
+| 45 | [45-uncanny.md](45-uncanny.md) | **诡异调味规则书**：v2 治愈基调下允许的恐怖元素边界 + SCP 风分类 | 设计 jumpscare / 诡异事件之前 |
 | 50 | ❌ ~~mask-rules.md~~ | **v1 已废止**（傩戏面具体系砍） | 不再维护 |
 | 51 | ❌ ~~51-masks/~~ | **v1 已废止**（v2 无面具系统） | 不再维护 |
 | 60 | [60-levels/](60-levels/) | 关卡条目（v2 = 唯一关 [`01-shan.md`](60-levels/01-shan.md)） | 改具体关卡时 |
