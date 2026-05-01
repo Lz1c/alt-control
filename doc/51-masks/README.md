@@ -1,23 +1,19 @@
-# 51 · 面具条目
+# 51 · 面具条目（❌ v1 已废止）
 
-> 每个面具一个 md 文件。规则与模板见 [`../50-mask-rules.md`](../50-mask-rules.md)。
-> 加新面具走 `/new-mask` 斜杠命令，会自动建文件 + 更新本索引。
+> ❌ **v1 已废止 (2026-05-01 v2 收紧)** — v2 没有面具收集机制，本目录不再扩张。详见 [`../plan/rules-revisions.md` 2026-05-01 v2 cutover](../plan/rules-revisions.md)。
+>
+> 规则文档 [`../50-mask-rules.md`](../50-mask-rules.md) 同样标废止。
 
-## 命名
+## v1 计划过的面具 ID（全部未实现）
 
-- 文件名 = 面具 ID，例如 `mask-dejiang-02.md`
-- ID 规则：`mask-<体系 slug>-<两位数字>`，详见 [`../50-mask-rules.md § 面具编号命名`](../50-mask-rules.md)
-
-## 当前条目
-
-| ID | 关联鬼 | 体系 | 状态 |
+| v1 ID | v1 关联鬼 | v1 体系 | v2 状态 |
 |---|---|---|---|
-| `mask-dixi-01` | [ghost-yundong-yuan](../41-ghosts/ghost-yundong-yuan.md) | 安顺地戏（汉军傩武将"奔面"） | 未设计（卡片待 `/new-mask`） |
-| `mask-dejiang-02` | [ghost-xianying](../41-ghosts/ghost-xianying.md) | 德江傩堂戏（半截活口） | 未设计 |
-| `mask-dejiang-05` | [ghost-qintong](../41-ghosts/ghost-qintong.md) | 德江傩堂戏（秦童丑角） | 未设计 |
-| `mask-gelao-02` | [ghost-fenshen](../41-ghosts/ghost-fenshen.md) | 仡佬族活口 | 未设计 |
-| `mask-han-02` | [ghost-beimian](../41-ghosts/ghost-beimian.md) | 汉俗白无常 + 苗巴岱 | 未设计 |
-| `mask-maonan-03` | [ghost-xiaomian](../41-ghosts/ghost-xiaomian.md) | 毛南族肥套 | 未设计 |
-| ~~`mask-cuotaiji-01`~~ | ~~ghost-guniang~~ | ~~威宁撮泰吉~~ | ❌ 已废弃（鬼被替换为 ghost-yundong-yuan） |
+| `mask-dixi-01` | ghost-yundong-yuan | 安顺地戏 | ❌ 不再设计 |
+| `mask-dejiang-02` | ghost-xianying | 德江傩堂戏 | ❌ |
+| `mask-dejiang-05` | ghost-qintong | 德江傩堂戏 | ❌ |
+| `mask-gelao-02` | ghost-fenshen | 仡佬族活口 | ❌ |
+| `mask-han-02` | ghost-beimian | 汉俗白无常 | ❌ |
+| `mask-maonan-03` | ghost-xiaomian | 毛南族肥套 | ❌ |
+| `mask-cuotaiji-01` | ghost-guniang | 威宁撮泰吉 | ❌ |
 
-> "未设计" = ID 已在鬼卡里占位，但面具本身还没有 md 文件；跑 `/new-mask` 填充后状态转为"已设计"。
+**v2 不做面具系统**。新收集物是玩家自己拍的相册（`<ProjectRoot>/photo/`）。

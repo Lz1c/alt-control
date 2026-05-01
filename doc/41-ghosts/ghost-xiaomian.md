@@ -1,4 +1,8 @@
-# ghost-xiaomian · 笑面娃娃
+# ghost-xiaomian · 笑面娃娃 ❌ 已废止
+
+> ❌ **v1 已废止 (2026-05-01 v2 收紧)** — 详见 [`../plan/rules-revisions.md` 2026-05-01 v2 cutover](../plan/rules-revisions.md)。
+>
+> v2 影卡见 [`README.md`](README.md)。
 
 **分类**：扰乱鬼
 **出现关卡**：02、05、08

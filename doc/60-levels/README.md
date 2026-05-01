@@ -1,24 +1,10 @@
 # 60 · 关卡条目
 
-> 每关一个 md 文件，文件名 `NN-slug.md`，编号按通关顺序。
-> 模板见 `../30-level-design.md § 关卡条目模板` —— 复制整段粘到新文件开头。
+> **2026-05-01 v2 收紧后**：v2 只有一关。本目录只维护 [`01-shan.md`](01-shan.md)。
+> 模板见 [`../30-level-design.md § 关卡条目模板`](../30-level-design.md)。
 
-## 命名约定
+## 当前条目
 
-- `01-gu-xiang.md` → 第 1 关 "古巷"
-- `02-xi-ban.md` → 第 2 关 "戏班"
-- 如果需要章节分组，用双位数前缀：`11-xxx.md` 表示第 2 章第 1 关。
-
-## 列表（占位）
-
-| 编号 | 关名 | 章节 | Boss 鬼 | 状态 |
-|---|---|---|---|---|
-| 01 | ⚠️ TBD | 序章 | ghost-tbd | 未写 |
-| 02 | ⚠️ TBD | 第一章 | ghost-tbd | 未写 |
-
-新增一关时：
-
-1. 跑 `/new-ghost boss <名>` 在 `../41-ghosts/` 里建 Boss 鬼条目（或沿用已有鬼的 ID）
-2. 跑 `/new-mask <体系> <名>` 在 `../51-masks/` 里落面具（如该鬼戴面具）
-3. 本目录新建 `NN-slug.md`，套 `../30-level-design.md` 的模板填
-4. 回到本 README 更新列表
+| 编号 | 关名 | Boss 影 | 状态 |
+|---|---|---|---|
+| [01](01-shan.md) | 山（v2 唯一关卡）| ghost-feng-kou-shan-jun + ghost-shan-ding-shou-zhe | 🟡 In-Progress |

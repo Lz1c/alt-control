@@ -1,4 +1,8 @@
-# ghost-guniang · 姑娘 ⚠️ 占位
+# ghost-guniang · 姑娘 ❌ 已废止
+
+> ❌ **v1 已废止 (2026-05-01 v2 收紧)** — 详见 [`../plan/rules-revisions.md` 2026-05-01 v2 cutover](../plan/rules-revisions.md)。
+>
+> v2 影卡见 [`README.md`](README.md)。
 
 **分类**：Boss 鬼
 **首次出现关卡**：01 · 古巷夜啼

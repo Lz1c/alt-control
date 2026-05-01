@@ -1,4 +1,8 @@
-# ghost-qintong · 秦童
+# ghost-qintong · 秦童 ❌ 已废止
+
+> ❌ **v1 已废止 (2026-05-01 v2 收紧)** — 详见 [`../plan/rules-revisions.md` 2026-05-01 v2 cutover](../plan/rules-revisions.md)。
+>
+> v2 影卡见 [`README.md`](README.md)。
 
 **分类**：扰乱鬼（世俗丑角型 · **刻意打破恐怖基调**）
 **出现关卡**：几乎所有关卡（高频率、低威胁、背景噪点式分布）

@@ -1,5 +1,7 @@
 # 20 · 办公室 / Hub
 
+> ❌ **v1 已废止 (2026-05-01 v2 收紧)** — 项目改为单关登山治愈版，办公室 hub / 委托板 / 多关切换 / 面具墙 / 图鉴书全部砍掉。游戏从主菜单直接进 trailhead。详见 [`plan/rules-revisions.md` 2026-05-01 v2 cutover](plan/rules-revisions.md)。本文件保留作历史，不再维护。
+>
 > 这一卷：办公室空间 + 进度系统。关卡之间的一切都在这发生。
 > 关卡本身见 `30-level-design.md`。
 

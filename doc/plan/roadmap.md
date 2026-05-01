@@ -1,89 +1,111 @@
 # Roadmap
 
-> 一关一关纵切。规则层修改走 [`rules-revisions.md`](rules-revisions.md) 单独流。
-> 这份路线随项目演进会被改。每次改记一条到 [`decisions-log.md`](decisions-log.md)。
+> **2026-05-01 v2 收紧后**：一个月交作业，单关登山治愈版。v1 的多关纵切 / 章节解锁 / 横切轨道全部归档不再生效。
+> 改这份路线随项目演进会被改。每次改记一条到 [`decisions-log.md`](decisions-log.md)。
 
-## Phase 0 · 铺地基（当前）
+## 总轴：4 周交付
 
-**目标**：把"一关一关推"的轨道搭好。不接触任何关卡内容。
-
-工作清单：
-- [x] `doc/plan/` 六个 md 创建
-- [x] `CLAUDE.md` 加 3 节（Design Workflow / Slash Commands / Doc Status Legend）
-- [x] `/audit-docs` `/lock-level` `/next-step` 三个斜杠命令
-- [x] `level-planner` 子代理
-- [x] `doc/41-ghosts/README.md` 加分层视图
-- [ ] 跑一遍 dry-run 验收（见 [README.md](README.md)）
-
-**退出条件**：dry-run 四步验证全过。
-
----
-
-## Phase 1 · L1 纵切片
-
-**目标**：跑通"L1 教快门"最小完整循环（设计 → Unity 实装 → 拍样片验证）。
-
-**候选设定**：
-- 知识锁：快门优先
-- Boss：`ghost-guniang`（需补 ~70% 内容）
-- 扰乱鬼：`ghost-yingzi`（影子，主教学）+ `ghost-qintong`（秦童，调剂）
-
-**子阶段**：
-
-1. **设计阶段**（文档侧）
-   - 调 `level-planner` 输入 "L1 / 序章 / 锁=快门"
-   - 用 `open-questions.md` 记本关需决定的 5-8 个问题
-   - 完成 `ghost-guniang`
-   - 抽出本关用到的面具卡（`/new-mask`）
-   - 写 `doc/60-levels/01-*.md`（`/new-level`）
-   - 补 `doc/31-photo-judgment.md`（PhotoEvaluator 算法规格）
-   - 跑 `/audit-docs` 全绿 → `/lock-level 01`
-2. **实装阶段**（Unity 侧）
-   - 新建 `Assets/_Project/Scenes/level-01.unity`
-   - 占位 prefab + Boss 触发器 + PhotoEvaluator 实装
-3. **验证阶段**
-   - Play Mode 走流程，拍 3 张样片，校准评分曲线
-   - 调通 → `decisions-log.md` 记 verified
-
-**退出条件**：从主菜单进 L1 → 拍出 ≥ passingScore 的照片 → 看到通关反馈。
-
----
-
-## Phase 2..N · 后续关卡
-
-每关都是一次 Phase 1 拷贝。区别只在知识锁链节不同。
-
-**候选锁链节顺序**（不承诺，每关结束后回看修正）：
-
-| 关 | 候选知识锁 | 备注 |
+| 周 | 主题 | 退出条件 |
 |---|---|---|
-| L2 | ISO + 暗光噪点 | 引入 `ghost-xianying` 或 `ghost-xiaomian` |
-| L3 | 对焦距离 / 景深 | 引入 `ghost-beimian` |
-| L4 | 构图 + 分身 | 引入 `ghost-fenshen`，PhotoEvaluator 加"唯一性"项 |
-| L5+ | 闪光 / 长曝积分 | 远期，可能动 `CAMExposureAccumulator` 接入 |
+| **W1（5/1–5/7）** | 设计冻结 + 资产入场 | 单关 md + 6 张影卡完成；Cairn 场景资产导入项目；玩家从 trailhead 走到 trailhead 终点能跑通（无影） |
+| **W2（5/8–5/14）** | 单点拉通 | 段 1 林祠静坐者 100% 实装：影 prefab + PhotoEvaluator 接入 + 笔记本翻页 UI + 拍照存盘 + 拍达标解锁笔记本"完整版"。这是垂直切片，所有后段抄它 |
+| **W3（5/15–5/21）** | 全 6 影 + 2 Boss 实装 | 6 段山路全跑通，所有影行为 + 拍照判定 + 笔记本节奏 OK。Boss B 山顶段触发结尾相册回放 |
+| **W4（5/22–5/30）** | 抛光 + 验收 | 美术调一遍（Cairn 风 cel-shaded post）+ 音效一轮 + 字幕 / 笔记本文案 + bug list 清空。Build 出 windows exe，全程 30-45 分钟可玩通 |
 
-具体关卡数最终由叙事章节决定，不一定是 5 关。
-
----
-
-## 横切轨道（与关卡平行）
-
-不属于任何单关，但需在某个时机插入：
-
-| 轨道 | 何时启动 | 一句话目标 |
-|---|---|---|
-| `70-narrative.md` 主线 | L1 实装后、L2 启动前 | 把序章 + 第一章主角动机和章节主题填掉 |
-| `20-office-hub.md` 完整化 | L2 结束后 | 反推办公室解锁节奏 + 房间数量 |
-| UI/HUD 设计 | L1 实装时同步 | 曝光表 / 对焦距离读数最低可用版 |
-| 音频清单 | L2 启动前 | 童谣 / 脚步 / 显形音定一份基础清单 |
-
-何时启动由 `/next-step` 根据本文件触发提示。
+每周末 sync 一次：见用户当面 / 或 commit message 标 `[Wn-end]`。
 
 ---
 
-## 收尾阶段（远期）
+## W1 · 设计冻结 + 资产入场
 
-- localization（中→英覆盖范围 TBD）
-- accessibility 模式（PhotoEvaluator 阈值放宽档）
-- 平台移植（PC 是默认，主机是远期）
-- 美术抛光（替换 LowPoly 占位资产）
+**目标**：把 v2 的设计稿全部 lock，Unity 项目接入 Cairn 场景资产，能从主菜单走到山顶（空场景，无影）。
+
+任务清单：
+
+- [ ] `doc/00-overview.md` ✅（已重写）
+- [ ] `doc/plan/*` 全部对齐 v2 ✅（rules-revisions / decisions-log / roadmap / knowledge-lock-chain）
+- [ ] `doc/40-ghost-rules.md` rename 鬼→影 ✅
+- [ ] `doc/30-level-design.md` 多关 → 单关模板 ✅
+- [ ] `doc/10-camera-rules.md` 删§解锁策略 ✅
+- [ ] `doc/60-levels/01-shan.md` 单关卡片
+- [ ] `doc/41-ghosts/` 6 张新影卡（2 Boss + 4 minion）
+- [ ] v1 残骸标 ❌ 废止头（20-office / 50-mask / 90-ref / 旧 8 鬼卡 / 41-ghosts/README）
+- [ ] **Cairn 资产导入**：场景文件 + 第一人称走路控制器 + cel-shaded post-process 管线（用户负责）
+- [ ] 主菜单 → 进 trailhead（一个空跑通）
+- [ ] `/audit-docs` 全绿 → `/lock-level 01`
+
+**退出条件**：从主菜单进 `01-shan.unity`，第一人称走完整条登山路径，**没有影**也能走到山顶。`01-shan.md` 标 🔒 Locked。
+
+---
+
+## W2 · 单点拉通（垂直切片）
+
+**目标**：把段 1 林祠静坐者做到 100%，证明所有系统能咬合。后段照抄。
+
+任务清单：
+
+- [ ] **影 prefab**：林祠静坐者 GameObject + `CAMMotionBlurSubject` + idle 动画 + 显形条件（举相机 + 半按对焦命中）
+- [ ] **PhotoEvaluator**：实装 `doc/10-camera-rules.md § 拍照判定` 的 5 维评分；对接 `CAMPhotoCapture` 拍照后回调，输出 0-100 分 + 各维度细分
+- [ ] **达标判定**：`passingScore` 60；分数 ≥ 60 → 触发"完整版"笔记本翻页解锁；< 60 → "半页"
+- [ ] **笔记本 UI**：实体翻页 / 浮窗 / 取景器叠加（用户决定形态后实装）。一页对应一段 + 一只影
+- [ ] **拍照存盘**：`<ProjectRoot>/photo/` 已经有，确认每张拍的都进文件夹（含拍糊）
+- [ ] **段 1 完整流程**：玩家从 trailhead 走到林祠点 → 看到笔记本第 1 页（半按对焦提示）→ 举相机 → 看到林祠静坐者显形 → 半按 + 全按 → 看到分数 + 笔记本完整版解锁
+
+**退出条件**：段 1 30 秒玩通，影显形 + 拍照 + 达标判定 + 笔记本翻页一连串无 bug。
+
+---
+
+## W3 · 全 6 影 + 2 Boss 实装
+
+**目标**：W2 的模板复制到段 2-6，每段一只影。Boss A 段 4 + Boss B 段 6 加更复杂的行为。
+
+任务清单：
+
+- [ ] 段 2 雾里残影群（长曝消形机制 — 需要把 `CAMExposureAccumulator` 接入 `CAMPhotoCapture`，或者用 alpha 衰减替身）
+- [ ] 段 3 山鸦掠影（高速横向运动 + `blur_multiplier` 调高）
+- [ ] **段 4 Boss A 风口山君**：风暴粒子环境 + 暗光 + 综合考 ISO + 快门
+- [ ] 段 5 星灵（夜段 + 长曝积累星轨 — 长曝累积主线接入）
+- [ ] **段 6 Boss B 山顶守者**：景深 + 对焦距离玩法 + 长曝
+- [ ] **结尾相册回放**：山顶 Boss B 拍下后 → 自动播放本次拍的所有 PNG（按时间序）→ 黑屏 → "献给 ___" → 重玩按钮
+- [ ] 拍糊 = 中性结局：进相册回放但缺 Boss B 完整版页面
+
+**退出条件**：从主菜单走完整条山路，6 影全显形可拍，相册回放正常播。完整结局 + 中性结局两条线都通。
+
+---
+
+## W4 · 抛光 + 验收
+
+**目标**：项目交付状态。
+
+任务清单：
+
+- [ ] **视觉抛光**：Cairn 风 cel-shaded post（线条 / 色阶 / 大气透视）调一遍。如果 Cairn 资产已经带了 post 直接用
+- [ ] **音效一轮**：环境音（风 / 林 / 雪 / 星空）+ 相机快门 + 翻页 + 影显形音 + 山顶相册回放音乐
+- [ ] **字幕 / 笔记本文案**：朋友的笔记本 6 页 + 主角内心独白 1-2 句（关键节点）+ 结尾"献给"字幕
+- [ ] **Bug list 清空**：所有 W2/W3 留下的功能性 bug
+- [ ] **Build**：windows exe + 必要 dll，发到老师 / 助教手里能直接双击玩
+- [ ] **README.md**（项目根 / 交付版）：怎么操作、玩多久、怎么截图，3 段话
+
+**退出条件**：双击 exe → 主菜单 → 30-45 分钟玩通 → 看到完整结局或中性结局 → 无 crash / 无 softlock。这就是交作业版本。
+
+---
+
+## 已经决定不做的事（v2 删减）
+
+- 攀岩动作 / Cairn 物理抓握系统
+- 多关卡 / 章节 / 章节切换
+- 办公室 hub / 委托板 / 面具墙
+- 傩戏面具收集 / 民俗调研内容
+- 实体相机外设原型（决议保留概念，但 1 个月内只实装键盘替身）
+- 难度档 / accessibility 模式
+- localization（中文版交付）
+- Steam achievements / Cloud / 工坊
+- 配音
+
+---
+
+## 横切（非关键路径，能做就做）
+
+- **截图水印**：`CAMPhotoCapture` 已存盘，可以加一行底部水印（日期 + 主角名 + "致 ___ "）
+- **难度调节按钮**：把 `passingScore` 暴露在主菜单（隐藏选项），降低门槛 → 治愈基调下不必要，但可以作为兜底
+- **菜单 BGM**：1 首钢琴 + 弦乐
