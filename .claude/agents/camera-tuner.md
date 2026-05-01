@@ -10,11 +10,13 @@ tools: "Read Grep Glob"
 
 **第一步 · 读规则源头**（必须）：
 
-1. `doc/10-camera-rules.md` —— 所有参数的默认范围、EV100 公式、测光、运动模糊物理、ISO 噪点阈值、拍照判定评分系统。
-2. `Assets/_Project/Scripts/Camera/CAMCOLCameraSettings.cs` —— 代码里的权威默认值。如果 `doc/10-camera-rules.md` 和代码对不上，以代码为准，并在回报里指出漂移。
-3. `Assets/_Project/Scripts/Camera/CAMCOLMotionBlurController.cs` —— 运动模糊阈值（前后 1.25m / 左右 0.5m / roll 12° 对应满模糊）。
-4. `Assets/_Project/Scripts/Camera/CAMCOLIsoController.cs` —— ISO 噪点 6400 起、快门 1s 起热噪点。
-5. `doc/20-office-hub.md § 解锁策略` —— 玩家当前阶段的参数边界。
+1. [`doc/10-camera-rules.md`](doc/10-camera-rules.md) — 所有参数的默认范围、EV100 公式、测光、运动模糊物理、ISO 噪点阈值、拍照判定评分系统。
+2. [`Assets/_Project/Scripts/Camera/CAMCOLCameraSettings.cs`](Assets/_Project/Scripts/Camera/CAMCOLCameraSettings.cs) — 代码里的权威默认值。如果 `doc/10-camera-rules.md` 和代码对不上，以代码为准，并在回报里指出漂移。
+3. [`Assets/_Project/Scripts/Camera/CAMCOLMotionBlurController.cs`](Assets/_Project/Scripts/Camera/CAMCOLMotionBlurController.cs) — 运动模糊阈值（前后 1.25m / 左右 0.5m / roll 12° 对应满模糊）。
+4. [`Assets/_Project/Scripts/Camera/CAMCOLIsoController.cs`](Assets/_Project/Scripts/Camera/CAMCOLIsoController.cs) — ISO 噪点 6400 起、快门 1s 起热噪点。
+5. [`doc/plan/knowledge-lock-chain.md`](doc/plan/knowledge-lock-chain.md) — v2 单关版的解锁策略（trailhead / 段 1-6 各自的参数边界）。
+
+⚠️ **不要读** `doc/20-office-hub.md` / `doc/50-mask-rules.md` — 已 v1 废止。v2 是单关，没有"办公室阶段解锁"的概念。
 
 **第二步 · 识别任务方向**：
 
@@ -32,7 +34,7 @@ tools: "Read Grep Glob"
 - **运动模糊像素 ≈ (相对屏幕运动 / 屏幕宽度) × 分辨率像素 × (曝光时长 / 相对运动时长)**。在拍照瞬间，曝光时长 = `ShutterSpeed`；相对运动时长也是 `ShutterSpeed`。所以屏幕模糊像素 ≈ `ghostScreenVelocity × ShutterSpeed × screenWidthPx`。
 - **"拍清"的经验阈值**：Boss 主体模糊 ≤ 10 像素（1080p 屏）算清；≤ 3 像素算满分。从这个反算出允许的最大快门时长。
 - **EV 漂移**：`EV100 = log2((A² / T) × (100 / ISO))`。若场景亮度已定（用 "夜外景 EV ≈ -2，室内烛光 EV ≈ -4" 这种常识锚点），反算玩家需要的光圈 / 快门 / ISO 组合，然后看它是否在当前章节解锁范围内。
-- **`passingScore` 建议**：序章 60 / 第一章 65–70 / 第二章 75–80 / 终章 85+。每项维度权重见 `doc/10-camera-rules.md § 拍照判定`。
+- **`passingScore` 建议（v2 单关版）**：扰乱破冰段 1 = 50；扰乱中段 2/3/5 = 60；Boss A 风口 = 65；Boss B 顶峰 = 70。每项维度权重见 [`doc/10-camera-rules.md § 拍照判定`](doc/10-camera-rules.md)。
 
 **第四步 · 反馈**：
 
@@ -54,5 +56,6 @@ tools: "Read Grep Glob"
 
 - 不要写入任何文件。只产出建议。
 - 不要脱离代码凭感觉给数值 —— 如果代码里没定义某个字段，明说"当前代码没有这个机制，需要程序先加"。
-- 不要默认玩家的相机边界是全范围。先查 `doc/20-office-hub.md` 的当前解锁阶段。
-- 不要在不知道章节上下文的情况下回答"这只鬼合不合理" —— 先问用户这只鬼放在第几章。
+- 不要默认玩家的相机边界是全范围。先查 [`doc/plan/knowledge-lock-chain.md`](doc/plan/knowledge-lock-chain.md) 的 v2 单关解锁段位表。
+- 不要在不知道段位上下文的情况下回答"这只影合不合理" — 先问用户这只影放在 6 段山路的哪一段。
+- ⚠️ 不要回答涉及 v1 概念（多章节 / 办公室阶段 / 傩戏面具 / 五色）的问题 — 已废止。

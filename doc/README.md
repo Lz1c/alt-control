@@ -1,49 +1,46 @@
 # 策划案 · 目录
 
-像 D&D 规则书一样组织：**规则卷** 定死数值和判定，**图鉴卷 / 关卡卷** 填内容。
+> **2026-05-01 v2 收紧后版本**。一个月交作业，单关登山治愈版。
+> v1（驱魔师 + 多关 + 傩戏面具）已归档，详见 [`plan/decisions-log.md` 2026-05-01](plan/decisions-log.md) 与 [`plan/rules-revisions.md`](plan/rules-revisions.md)。
+
+像 D&D 规则书一样组织：**规则卷** 定死数值和判定，**条目卷**（关卡 / 影）填内容。
 
 ## 分卷
 
 | 卷 | 文件 | 性质 | 何时看 |
 |----|------|------|--------|
-| 00 | [overview.md](00-overview.md) | 世界观 + 核心循环 | 第一次接触项目 / 给新人看 |
-| 10 | [camera-rules.md](10-camera-rules.md) | **规则书**：相机参数、EV、测光、拍照判定 | 做相机 / 调数值 / 设计鬼的拍照条件 |
-| 20 | [office-hub.md](20-office-hub.md) | 办公室（Hub）系统 + 进度解锁 | 做办公室 / 新增解锁项 / 图鉴 |
-| 30 | [level-design.md](30-level-design.md) | 关卡通用结构模板 | 新开一关之前 |
-| 40 | [ghost-rules.md](40-ghost-rules.md) | **鬼规则**：Boss 鬼 + 扰乱鬼两种模板、通用字段 | 加一只新鬼之前 |
-| 41 | [41-ghosts/](41-ghosts/) | 每只鬼一个 md，按 40 的模板填 | 查 / 写具体鬼 |
-| 50 | [mask-rules.md](50-mask-rules.md) | 面具规则：五色体系、11 个体系清单、三大风险、模板 | 定面具 / 考据 |
-| 51 | [51-masks/](51-masks/) | 每个面具一个 md | 查 / 写具体面具 |
-| 60 | [60-levels/](60-levels/) | 每关一个条目文件 | 写具体关卡 |
-| 70 | [narrative.md](70-narrative.md) | 主线剧情 / 章节叙事 | 写故事 |
+| 00 | [overview.md](00-overview.md) | 世界观 + 核心循环（v2 治愈版） | 第一次接触项目 / 新人入门 |
+| 10 | [camera-rules.md](10-camera-rules.md) | **规则书**：相机参数、EV、测光、拍照判定 | 做相机 / 调数值 / 设计影的拍照条件 |
+| 20 | ❌ ~~office-hub.md~~ | **v1 已废止**（办公室 hub 砍） | 不再维护 |
+| 30 | [level-design.md](30-level-design.md) | **关卡结构**（v2 单关线性登山） | 改关卡模板时 |
+| 40 | [ghost-rules.md](40-ghost-rules.md) | **影规则**：Boss 影 + 扰乱影两种模板、通用字段 | 加新影之前 |
+| 41 | [41-ghosts/](41-ghosts/) | 每只影一个 md（v2 = 6 张；v1 旧 8 张归档） | 查 / 写具体影 |
+| 50 | ❌ ~~mask-rules.md~~ | **v1 已废止**（傩戏面具体系砍） | 不再维护 |
+| 51 | ❌ ~~51-masks/~~ | **v1 已废止**（v2 无面具系统） | 不再维护 |
+| 60 | [60-levels/](60-levels/) | 关卡条目（v2 = 唯一关 [`01-shan.md`](60-levels/01-shan.md)） | 改具体关卡时 |
+| 70 | [narrative.md](70-narrative.md) | 主角 / 朋友 / 山的叙事骨架 | 写故事文案时 |
+| 90 | [90-reference/](90-reference/) | 调研与外部参考（傩戏调研已废止保留作历史） | 加新调研时 |
+| plan | [plan/](plan/) | **规划系统**：roadmap / 知识锁链 / 决议日志 / 待决问题 / 规则修订 | **每次开新对话先看 [`plan/README.md`](plan/README.md)** |
 
 ## 写作约定
 
-- **规则卷**（10、30、40、50）用表格和数值，定模板，**不放具体条目**。
-- **图鉴卷**（41 鬼、51 面具、60 关卡）每个条目一个 md 文件。文件名 = ID，按对应规则卷的模板填。
-- 新增 ≠ 手动 `Write`：鬼走 `/new-ghost`、面具走 `/new-mask`、关卡走 `/new-level`。斜杠命令会顺带更新索引 README。
+- **规则卷**（10、30、40）用表格和数值，定模板，**不放具体条目**。
+- **条目卷**（41 影、60 关卡）每个条目一个 md 文件。文件名 = ID，按对应规则卷的模板填。
+- 新增 ≠ 手动 `Write`：影走 `/new-ghost`、关卡走 `/new-level`。斜杠命令会顺带更新索引 README。⚠️ **不要跑 `/new-mask`**（v2 废止）。
 - 标注未定：用 `TBD` 或 `⚠️`，方便全局搜索。
 - 数值引用代码里的默认值时，**把代码字段名用行内代码标出**，例如 `CAMCOLCameraSettings.isoLimits`，方便之后改代码时反查。
-- 术语统一：**Boss 鬼 / 扰乱鬼 / 氛围物 / 驱魔师 / 办公室**。别混用"小鬼/杂鱼/背景物"。
+- **术语统一（v2）**：影 / 余像 / 旧时人 / 山的记忆（不再用"鬼" / "驱魔师" / "面具" / "办公室" / "委托"）。但**技术 ID 仍叫 `ghost-*`**，避免破坏数百处引用——这个例外见 [`40-ghost-rules.md § v2 术语`](40-ghost-rules.md)。
 
-### 什么时候把一卷拆成子目录
+## v1 废止内容（保留作历史，不再维护）
 
-触发条件（满足任一个就拆）：
+下列文件顶部都已加 ❌ 废止 banner。文件本体保留为历史参考。
 
-- 该卷里**同类条目超过 5 个**（例如镜头表从 4 个长到 6 个）
-- **任一条目超过 20 行**（说明它自己就该是一张卡）
-- 出现"想给这个条目单独写详细设定 / 美术参考 / 解锁故事"的冲动
-
-拆分动作（参考 `40 → 41-ghosts/` 和 `50 → 51-masks/` 的前例）：
-
-1. 原卷改名加 `-rules` 后缀，只留**规则 + 模板 + 链接到子目录**
-2. 新建 `NN-<topic>/` 子目录（编号 = 原卷 + 1），在 `README.md` 里放索引表
-3. 把每个条目搬进子目录独立文件，`###` heading 调成 `#`
-4. 写 / 更新一个 `/new-<topic>` 斜杠命令，负责自动建文件 + 更新索引
-5. 扫全仓引用（`Grep "原文件名"`），把所有链接指向新路径
-
-**别提前拆**：条目只有 3–4 行表格时不拆，建空文件夹只会增加导航成本。
+- `doc/20-office-hub.md`
+- `doc/50-mask-rules.md`
+- `doc/51-masks/` 目录
+- `doc/90-reference/nuo-masks.md`
+- `doc/41-ghosts/ghost-yundong-yuan.md` / `ghost-guniang.md` / `ghost-yingzi.md` / `ghost-xianying.md` / `ghost-beimian.md` / `ghost-fenshen.md` / `ghost-xiaomian.md` / `ghost-qintong.md`
 
 ## 版本
 
-这是游戏策划案，不是玩家手册。允许粗糙，鼓励写 `TBD` 和占位。每次迭代在对应卷顶部加一条日期 + 变更摘要即可。
+这是游戏策划案，不是玩家手册。允许粗糙，鼓励写 `TBD` 和占位。每次大改在对应卷顶部加日期 + 变更摘要；项目级方向变动走 [`plan/rules-revisions.md`](plan/rules-revisions.md) 流程。
