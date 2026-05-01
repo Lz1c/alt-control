@@ -21,7 +21,7 @@ v2 项目是单关登山治愈版（详见 [`doc/00-overview.md`](doc/00-overvie
 - [`doc/41-ghosts/`](doc/41-ghosts/)
 - [`doc/60-levels/`](doc/60-levels/)
 
-⚠️ **不扫 `doc/51-masks/`** — 已 v1 废止。
+⚠️ **不扫 `doc/51-masks/`** — 目录已物理删除（v2 没有面具系统）。
 
 按以下规则判定状态：
 
@@ -42,7 +42,7 @@ v2 项目是单关登山治愈版（详见 [`doc/00-overview.md`](doc/00-overvie
 | 文件 | 状态 | 阻塞项 / 备注 |
 |---|---|---|
 | ghost-lin-ci-jing-zuo.md | 🟡 In-Progress | 笔记本完整版文案待填 |
-| ghost-yundong-yuan.md | ❌ 废止 | v1 校园题材 |
+| ghost-feng-kou-shan-jun.md | 🟡 In-Progress | 笔记本完整版文案待填 |
 ...
 
 ### 关卡 (doc/60-levels/)
@@ -105,7 +105,7 @@ v2 项目是单关登山治愈版（详见 [`doc/00-overview.md`](doc/00-overvie
 
 如果用户传了 `--since-rev`，额外做：
 
-1. 用 `git log --oneline -- doc/10-camera-rules.md doc/40-ghost-rules.md doc/30-level-design.md` 找出最近的规则层 commit（v2 不再追踪 50-mask-rules.md）
+1. 用 `git log --oneline -- doc/10-camera-rules.md doc/40-ghost-rules.md doc/30-level-design.md doc/45-uncanny.md` 找出最近的规则层 commit（v2 规则层是这 4 个文件）
 2. 读 [`doc/plan/decisions-log.md`](doc/plan/decisions-log.md) 查 `01-shan.md` lock 时记录的规则层 SHA（如果已 Locked）
 3. 列出"哪些 Locked 关基于的规则层 SHA 比当前 HEAD 早" → 这些就是受影响关
 4. 对每个受影响关，建议处理方式：

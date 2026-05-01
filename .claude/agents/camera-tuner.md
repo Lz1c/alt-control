@@ -16,7 +16,7 @@ tools: "Read Grep Glob"
 4. [`Assets/_Project/Scripts/Camera/CAMCOLIsoController.cs`](Assets/_Project/Scripts/Camera/CAMCOLIsoController.cs) — ISO 噪点 6400 起、快门 1s 起热噪点。
 5. [`doc/plan/knowledge-lock-chain.md`](doc/plan/knowledge-lock-chain.md) — v2 单关版的解锁策略（trailhead / 段 1-6 各自的参数边界）。
 
-⚠️ **不要读** `doc/20-office-hub.md` / `doc/50-mask-rules.md` — 已 v1 废止。v2 是单关，没有"办公室阶段解锁"的概念。
+⚠️ `doc/20-office-hub.md` / `doc/50-mask-rules.md` 已物理删除（v1 废止）。v2 是单关，没有"办公室阶段解锁"的概念。
 
 **第二步 · 识别任务方向**：
 

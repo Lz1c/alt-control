@@ -1,6 +1,6 @@
 # 规则层修订流水
 
-> 改 `doc/10-camera-rules.md` / `40-ghost-rules.md` / `50-mask-rules.md` / `30-level-design.md`（**或 `Assets/_Project/Scripts/Camera/` 下的相机代码**）之前，**先**在这里起一条草稿条目；改完后归档。
+> 改规则层文件 `doc/10-camera-rules.md` / `30-level-design.md` / `40-ghost-rules.md` / `45-uncanny.md`（**或 `Assets/_Project/Scripts/Camera/` 下的相机代码**）之前，**先**在这里起一条草稿条目；改完后归档。
 >
 > 这是为了让下游（已 Locked 的关、已数值化的鬼/面具）不被悄悄改飞。
 
@@ -38,13 +38,14 @@
 |---|---|---|---|
 | `00-overview.md` | 驱魔师 + 办公室 + 多关 + 傩戏面具收集 | 登山摄影师 + 单关 + 朋友相机 + 笔记本叙事 + 治愈 | 全新覆盖 |
 | `10-camera-rules.md § 解锁策略` | 序章/第一章/第二章/终章 4 阶段 ISO/快门/光圈分阶解锁 | 单关全功能；解锁节奏改"叙事驱动"（笔记本翻页） | 删该 § 重写 |
-| `20-office-hub.md` | 办公室 hub 整章 | 砍 | 加 ❌ 废止头 |
+| `20-office-hub.md` | 办公室 hub 整章 | 砍 | **物理删除** |
 | `30-level-design.md` | 生化危机式封闭关卡模板 + 多种 Boss 触发条件 | 线性登山结构模板 + 笔记本叙事教学 | 模板重写 |
 | `40-ghost-rules.md` | "鬼"概念 + 傩戏面具锚定 + 一鬼一面具 | "影 / 余像"治愈基调 + 删面具锚定；技术 ID 仍 `ghost-*` | 局部改 |
-| `50-mask-rules.md` | 傩戏五色 + 民族体系 + 一对一收集 | 砍 | 加 ❌ 废止头 |
-| `90-reference/nuo-masks.md` | 300 行傩戏调研 | 砍 | 加 ❌ 废止头 |
-| `41-ghosts/*` 8 张旧卡 | 校园 + 民俗 ghosts | 全废，新建 6 张影卡（2 Boss + 4 minion） | 旧卡加 ❌；新卡新建 |
-| `51-masks/`, `60-levels/` | 空目录 | 51 砍；60 新建 `01-shan.md` | — |
+| `50-mask-rules.md` | 傩戏五色 + 民族体系 + 一对一收集 | 砍 | **物理删除** |
+| `90-reference/nuo-masks.md` | 300 行傩戏调研 | 砍 | **物理删除** |
+| `41-ghosts/*` 8 张旧卡 | 校园 + 民俗 ghosts | 全废，新建 6 张影卡（2 Boss + 4 minion） | 旧卡**物理删除**；新卡新建 |
+| `51-masks/` 目录 | 空目录 | 砍 | **物理删除** |
+| `60-levels/` | 空目录 | 新建 `01-shan.md` | — |
 | `plan/roadmap.md` | Phase 0..N 多关纵切 | v2 单关 4 周 W1-W4 | 全新 |
 | `plan/knowledge-lock-chain.md` | L1-L5+ 候选锁链节 | 单关版 6 段山路 × 6 概念 | 全新 |
 
@@ -61,7 +62,7 @@
 - Unity prefab/scene：无（L1 还未实装）
 - 代码：无（相机管线和题材完全解耦）
 
-**修复策略**：v1 全部归档不删（留作历史），v2 从零起骨架。
+**修复策略**：v1 全部物理删除（历史在 git log 里，commit `738d070` 之前是 v1 状态），v2 从零起骨架。
 
 **后续动作**：见 `decisions-log.md` 2026-05-01 条目下的 14 个 task。
 

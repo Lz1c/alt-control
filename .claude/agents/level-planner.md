@@ -44,7 +44,7 @@ v2 项目是**单关登山治愈版**（详见 [`doc/00-overview.md`](doc/00-ove
 6. [`doc/60-levels/01-shan.md`](doc/60-levels/01-shan.md) — 唯一已建关，看玩家在新关入场时已经掌握了什么
 7. [`doc/00-overview.md`](doc/00-overview.md) — v2 治愈调性
 
-⚠️ **不要读** `50-mask-rules.md` / `90-reference/nuo-masks.md` / `20-office-hub.md` — 已 v1 废止。
+⚠️ **不要写 v1 概念**（傩戏 / 面具 / 民族体系 / 办公室 / 多关章节）— v1 卷（`20-office-hub.md` / `50-mask-rules.md` / `51-masks/` / `90-reference/nuo-masks.md`）已物理删除。
 
 ### 第二步 · 输入解析
 

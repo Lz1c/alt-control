@@ -8,7 +8,7 @@ allowed-tools: "Read"
 
 ## ❌ 此命令已废止（2026-05-01 v2 收紧）
 
-v2 项目改为单关登山治愈版，砍掉了傩戏面具收集机制 / 一鬼一面具系统 / 五色色谱体系。`doc/50-mask-rules.md` 与 `doc/51-masks/` 目录已标 v1 废止。
+v2 项目改为单关登山治愈版，砍掉了傩戏面具收集机制 / 一鬼一面具系统 / 五色色谱体系。`doc/50-mask-rules.md` 与 `doc/51-masks/` 目录已物理从仓库删除。
 
 详见 [`doc/plan/rules-revisions.md` 2026-05-01 v2 cutover](doc/plan/rules-revisions.md)。
 

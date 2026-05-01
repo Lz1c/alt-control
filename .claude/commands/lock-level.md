@@ -10,7 +10,7 @@ allowed-tools: "Read Grep Glob Edit Bash"
 
 v2 项目是单关登山治愈版，唯一关 `01-shan.md`。本命令在 v2 下主要用来 lock `01`。`/lock-level 01` 之后进入 W2 单点拉通阶段（详见 [`doc/plan/roadmap.md`](doc/plan/roadmap.md)）。
 
-⚠️ v2 不再追踪 `50-mask-rules.md` SHA（已废止）。
+⚠️ v2 规则层文件 = `10-camera-rules.md` / `30-level-design.md` / `40-ghost-rules.md` / `45-uncanny.md`。`50-mask-rules.md` 已物理删除。
 
 ## 你要做的事
 
@@ -54,11 +54,10 @@ v2 项目是单关登山治愈版，唯一关 `01-shan.md`。本命令在 v2 下
 
 ```bash
 git -C D:/Unity/Project/alt-control log -1 --format=%h -- doc/10-camera-rules.md
-git -C D:/Unity/Project/alt-control log -1 --format=%h -- doc/40-ghost-rules.md
 git -C D:/Unity/Project/alt-control log -1 --format=%h -- doc/30-level-design.md
+git -C D:/Unity/Project/alt-control log -1 --format=%h -- doc/40-ghost-rules.md
+git -C D:/Unity/Project/alt-control log -1 --format=%h -- doc/45-uncanny.md
 ```
-
-⚠️ **不取 `50-mask-rules.md` SHA**（v2 已废止）。
 
 **b. 关卡 md 顶部插入锁定块**（用 Edit，定位到文件首行 `# ` 标题之上）：
 
@@ -68,6 +67,7 @@ git -C D:/Unity/Project/alt-control log -1 --format=%h -- doc/30-level-design.md
 - 10-camera-rules.md @ <sha>
 - 30-level-design.md @ <sha>
 - 40-ghost-rules.md @ <sha>
+- 45-uncanny.md @ <sha>
 
 ---
 ```
@@ -88,7 +88,7 @@ git -C D:/Unity/Project/alt-control log -1 --format=%h -- doc/30-level-design.md
 - 关卡：<显示名>
 - Boss 影：<ghost-id 列表>
 - 扰乱影：<id 列表，逗号分隔>
-- 规则层 SHA：10@<sha> / 30@<sha> / 40@<sha>
+- 规则层 SHA：10@<sha> / 30@<sha> / 40@<sha> / 45@<sha>
 - 下一步：进 Unity 实装（W2 单点拉通）
 
 ---
@@ -109,4 +109,4 @@ git -C D:/Unity/Project/alt-control log -1 --format=%h -- doc/30-level-design.md
 - 一次只能锁一关
 - 所有的日期用真实当前日期，不要用占位
 - Edit 失败（找不到锚点）就回报，不要 `replace_all`
-- ⚠️ **不要**校验 `mask-*` ID / **不要**触碰 `doc/51-masks/` / **不要**取 `50-mask-rules.md` SHA
+- ⚠️ **不要**校验 `mask-*` ID（v2 没有面具系统） / `doc/51-masks/` 与 `50-mask-rules.md` 已物理删除

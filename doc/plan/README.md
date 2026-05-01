@@ -50,13 +50,6 @@ W1 设计文档刚写完，接下来：
 - W1 启动前提：`60-levels/01-shan.md` 未建
 - W1 启动前提：Cairn 场景资产未导入（用户侧）
 
-## v1 已废止内容（不再维护，留作历史）
+## v1 已彻底删除
 
-- `doc/20-office-hub.md`（办公室 hub）
-- `doc/50-mask-rules.md`（傩戏面具体系）
-- `doc/90-reference/nuo-masks.md`（傩戏调研）
-- `doc/41-ghosts/` 8 张旧鬼卡（运动员鬼 + 6 民俗鬼 + 姑娘）
-- `doc/51-masks/`（空目录，不再扩张）
-- v1 Phase 0-N 多关纵切计划
-
-详见 [`rules-revisions.md` 2026-05-01 v2 cutover](rules-revisions.md)。
+v2 收紧时被砍的卷（办公室 hub / 傩戏面具收集 / 8 张 v1 鬼卡 / 90-ref 傩戏调研 / Phase 0-N 多关计划）已物理从仓库删除——历史在 git log 里查（commit `738d070` 之前是 v1 状态）。详见 [`rules-revisions.md` 2026-05-01 v2 cutover](rules-revisions.md)。

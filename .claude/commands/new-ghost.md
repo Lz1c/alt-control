@@ -13,8 +13,8 @@ allowed-tools: "Read Grep Glob Edit Write"
 - 项目是单关登山治愈版，详见 [`doc/00-overview.md`](doc/00-overview.md)
 - 关卡 = 一座山，6 段路径，每段一只影。Boss 段固定（段 4 风口 / 段 6 顶峰），其他段都是扰乱
 - "鬼" 在 v2 写作"影 / 余像 / 旧时人"。技术 ID 仍叫 `ghost-*`
-- ⚠️ **不要读 `50-mask-rules.md` / `90-reference/nuo-masks.md` / `20-office-hub.md`**——已 v1 废止
-- ⚠️ **不要更新 `51-masks/README.md`**——v2 没有面具系统
+- ⚠️ **不要写 v1 概念**（傩戏 / 面具 / 五色 / 民族体系 / 办公室 hub / 多关切换）——v1 卷已物理删除（`20-office-hub.md` / `50-mask-rules.md` / `51-masks/` / `90-reference/nuo-masks.md` 不再存在）
+- ⚠️ **不要触碰 `doc/51-masks/`**——目录已删，v2 没有面具系统
 
 ## 你要做的事
 
@@ -48,5 +48,5 @@ allowed-tools: "Read Grep Glob Edit Write"
 - 用户一时说不清的字段可以先填 "TBD"，不要瞎编故事或民俗
 - `blur_multiplier` 的经验值：站定凝视型 0.3–0.5；正常行走 1.0；快速掠过 2.0–3.0；瞬移/残影靠 alpha 衰减替代
 - ⚠️ **不要写**民族 / 出处 / `mask_id` / 五色主色 / 傩戏 / 驱魔等 v1 词汇——v2 模板里不存在这些字段
-- ⚠️ **不要触碰** `doc/51-masks/` 任何文件
+- ⚠️ `doc/51-masks/` 已物理删除，不要试图新建该目录
 - 调性自查：影是"被山记下来的人"，不是怪物；不主动靠近玩家；拍照后反应温柔（光飘起 / 点头 / 淡出），不凝固崩解

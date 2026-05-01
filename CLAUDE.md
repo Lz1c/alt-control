@@ -21,16 +21,13 @@ The full game design lives in `doc/` (D&D-rulebook style, Chinese). **When worki
 - [`doc/README.md`](doc/README.md) — index of all design sections
 - [`doc/00-overview.md`](doc/00-overview.md) — core loop, design pillars (**v2**)
 - [`doc/10-camera-rules.md`](doc/10-camera-rules.md) — camera parameter rules, EV formula, photo judgment (**mirrors code numbers; update here when code changes**)
-- [`doc/20-office-hub.md`](doc/20-office-hub.md) — ❌ **v1 deprecated** (office hub cut)
 - [`doc/30-level-design.md`](doc/30-level-design.md) — level structure template (**v2 single-level**)
 - [`doc/40-ghost-rules.md`](doc/40-ghost-rules.md) — 影 rules & templates (Boss / 扰乱 two kinds)
-- [`doc/41-ghosts/`](doc/41-ghosts/) — individual 影 cards (v1 cards archived; v2 = 6 new cards)
+- [`doc/41-ghosts/`](doc/41-ghosts/) — individual 影 cards (v2 = 6 new cards; v1 cards physically deleted)
 - [`doc/45-uncanny.md`](doc/45-uncanny.md) — **uncanny layer rulebook**: SCP-style dread + 1 jumpscare exception, healing tone guardrails
-- [`doc/50-mask-rules.md`](doc/50-mask-rules.md) — ❌ **v1 deprecated** (Nuo mask system cut)
-- [`doc/51-masks/`](doc/51-masks/) — ❌ **v1 deprecated** (empty — no mask collection in v2)
 - [`doc/60-levels/`](doc/60-levels/) — per-level entries (**v2 = single level: `01-shan.md`**)
 - [`doc/70-narrative.md`](doc/70-narrative.md) — story arcs (mostly TBD)
-- [`doc/90-reference/nuo-masks.md`](doc/90-reference/nuo-masks.md) — ❌ **v1 deprecated** (Nuo research no longer relevant; kept for history)
+- [`doc/90-reference/`](doc/90-reference/) — research references (currently empty; v1 Nuo research deleted)
 - [`doc/plan/`](doc/plan/) — **planning system** (current phase, roadmap, knowledge-lock chain, decisions log, open questions, rules-revisions). Always read [`doc/plan/README.md`](doc/plan/README.md) at the start of a new conversation to know "where we are."
 
 ## Design Workflow

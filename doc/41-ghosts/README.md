@@ -31,19 +31,6 @@
 > ⚠️ 待建 = ID 已占位，影卡 md 还没建。跑 `/new-ghost` 落卡后状态转 🟡 In-Progress。
 > ⚠️ 用 `/new-ghost` 时**口头明确告知 v2 治愈基调 + 山系**，否则 agent 可能按 v1 民俗调性写。
 
-## v1 已归档（不再维护）
+## v1 鬼卡已物理删除
 
-下面 8 张卡 v1 设计阶段建的，2026-05-01 v2 收紧后全部废止。每张文件顶部已加 ❌ banner，文件保留作历史。
-
-| ID | v1 用途 | 备注 |
-|---|---|---|
-| [ghost-yundong-yuan](ghost-yundong-yuan.md) | 校园 L1 Boss · 运动员鬼 | ❌ |
-| [ghost-guniang](ghost-guniang.md) | 古巷夜啼 Boss 占位 | ❌ |
-| [ghost-yingzi](ghost-yingzi.md) | 民俗扰乱 · 影子（余光显形）| ❌ |
-| [ghost-xianying](ghost-xianying.md) | 民俗扰乱 · 显影（PNG 显形）| ❌ |
-| [ghost-beimian](ghost-beimian.md) | 民俗扰乱 · 背面（反射拍摄）| ❌ |
-| [ghost-fenshen](ghost-fenshen.md) | 民俗扰乱 · 分身 | ❌ |
-| [ghost-xiaomian](ghost-xiaomian.md) | 民俗扰乱 · 笑面娃娃（对焦触发）| ❌ |
-| [ghost-qintong](ghost-qintong.md) | 民俗扰乱 · 秦童（丑角调剂）| ❌ |
-
-详见 [`../plan/rules-revisions.md` 2026-05-01 v2 cutover](../plan/rules-revisions.md)。
+v1 设计阶段的 8 张鬼卡（ghost-yundong-yuan / ghost-guniang / ghost-yingzi / ghost-xianying / ghost-beimian / ghost-fenshen / ghost-xiaomian / ghost-qintong）已从仓库彻底删除——历史在 git log 里查。详见 [`../plan/rules-revisions.md` 2026-05-01 v2 cutover](../plan/rules-revisions.md)。

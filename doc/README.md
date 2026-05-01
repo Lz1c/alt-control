@@ -11,16 +11,13 @@
 |----|------|------|--------|
 | 00 | [overview.md](00-overview.md) | 世界观 + 核心循环（v2 治愈版） | 第一次接触项目 / 新人入门 |
 | 10 | [camera-rules.md](10-camera-rules.md) | **规则书**：相机参数、EV、测光、拍照判定 | 做相机 / 调数值 / 设计影的拍照条件 |
-| 20 | ❌ ~~office-hub.md~~ | **v1 已废止**（办公室 hub 砍） | 不再维护 |
 | 30 | [level-design.md](30-level-design.md) | **关卡结构**（v2 单关线性登山） | 改关卡模板时 |
 | 40 | [ghost-rules.md](40-ghost-rules.md) | **影规则**：Boss 影 + 扰乱影两种模板、通用字段 | 加新影之前 |
-| 41 | [41-ghosts/](41-ghosts/) | 每只影一个 md（v2 = 6 张；v1 旧 8 张归档） | 查 / 写具体影 |
+| 41 | [41-ghosts/](41-ghosts/) | 每只影一个 md（v2 = 6 张） | 查 / 写具体影 |
 | 45 | [45-uncanny.md](45-uncanny.md) | **诡异调味规则书**：v2 治愈基调下允许的恐怖元素边界 + SCP 风分类 | 设计 jumpscare / 诡异事件之前 |
-| 50 | ❌ ~~mask-rules.md~~ | **v1 已废止**（傩戏面具体系砍） | 不再维护 |
-| 51 | ❌ ~~51-masks/~~ | **v1 已废止**（v2 无面具系统） | 不再维护 |
 | 60 | [60-levels/](60-levels/) | 关卡条目（v2 = 唯一关 [`01-shan.md`](60-levels/01-shan.md)） | 改具体关卡时 |
 | 70 | [narrative.md](70-narrative.md) | 主角 / 朋友 / 山的叙事骨架 | 写故事文案时 |
-| 90 | [90-reference/](90-reference/) | 调研与外部参考（傩戏调研已废止保留作历史） | 加新调研时 |
+| 90 | [90-reference/](90-reference/) | 调研与外部参考（当前为空，v1 傩戏调研已删） | 加新调研时 |
 | plan | [plan/](plan/) | **规划系统**：roadmap / 知识锁链 / 决议日志 / 待决问题 / 规则修订 | **每次开新对话先看 [`plan/README.md`](plan/README.md)** |
 
 ## 写作约定
@@ -32,15 +29,9 @@
 - 数值引用代码里的默认值时，**把代码字段名用行内代码标出**，例如 `CAMCOLCameraSettings.isoLimits`，方便之后改代码时反查。
 - **术语统一（v2）**：影 / 余像 / 旧时人 / 山的记忆（不再用"鬼" / "驱魔师" / "面具" / "办公室" / "委托"）。但**技术 ID 仍叫 `ghost-*`**，避免破坏数百处引用——这个例外见 [`40-ghost-rules.md § v2 术语`](40-ghost-rules.md)。
 
-## v1 废止内容（保留作历史，不再维护）
+## v1 废止内容（已物理删除）
 
-下列文件顶部都已加 ❌ 废止 banner。文件本体保留为历史参考。
-
-- `doc/20-office-hub.md`
-- `doc/50-mask-rules.md`
-- `doc/51-masks/` 目录
-- `doc/90-reference/nuo-masks.md`
-- `doc/41-ghosts/ghost-yundong-yuan.md` / `ghost-guniang.md` / `ghost-yingzi.md` / `ghost-xianying.md` / `ghost-beimian.md` / `ghost-fenshen.md` / `ghost-xiaomian.md` / `ghost-qintong.md`
+v2 收紧时被砍的卷（驱魔师 + 多关 + 傩戏面具收集 + 校园 L1 + 6 民俗鬼）已彻底从仓库删除——历史在 git log 里查（commit `738d070` 之前是 v1 状态）。详见 [`plan/rules-revisions.md`](plan/rules-revisions.md) 与 [`plan/decisions-log.md` 2026-05-01](plan/decisions-log.md)。
 
 ## 版本
 

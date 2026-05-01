@@ -37,7 +37,7 @@ tools: "Read Grep Glob"
 5. [`doc/plan/knowledge-lock-chain.md`](doc/plan/knowledge-lock-chain.md) — 6 段山路对应 6 个相机概念，看新影补在哪一段
 6. [`doc/60-levels/01-shan.md`](doc/60-levels/01-shan.md) — 唯一关卡，看场景上下文
 
-⚠️ **不要读 `50-mask-rules.md` / `90-reference/nuo-masks.md` / `20-office-hub.md`** — 这些已 v1 废止。
+⚠️ **不要写 v1 概念**（傩戏 / 面具 / 五色 / 民族体系 / 驱魔师 / 办公室 hub / 委托板 / 多关切换 / 章节 passingScore 阶梯）— v1 卷已物理删除（`20-office-hub.md` / `50-mask-rules.md` / `51-masks/` / `90-reference/nuo-masks.md` 不再存在）。
 
 ### 第二步 · 理解需求
 

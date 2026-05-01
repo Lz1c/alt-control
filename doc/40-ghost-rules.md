@@ -163,12 +163,15 @@
 - 朋友当年与它的关联：
 ````
 
-## v1 已废止内容（不再使用）
+## 不要写的概念（v1 残留警示）
+
+新影卡 / 新写作绝不引入：
 
 - ❌ 傩戏面具锚定 / 一鬼一面具 / `mask_id` 字段 / `民族 / 出处` 字段
 - ❌ 鬼分"温和型 / 攻击型"二级
-- ❌ 鬼会攻击 / 追击 / 惊吓玩家
+- ❌ 鬼会主动攻击 / 追击玩家（jumpscare 例外见 [`45-uncanny.md`](45-uncanny.md)，仅段 4 风口 1 处）
 - ❌ "鬼头是面具的活体形态"视觉设定
 - ❌ 拍中后"鬼凝固成傩戏面具掉落"
+- ❌ 五色色谱 / 民族体系 / 驱魔师 / 办公室 hub / 委托板 / 多关切换
 
-详见 [`plan/rules-revisions.md` 2026-05-01 v2 cutover](plan/rules-revisions.md)。
+历史背景见 [`plan/rules-revisions.md` 2026-05-01 v2 cutover](plan/rules-revisions.md)。
