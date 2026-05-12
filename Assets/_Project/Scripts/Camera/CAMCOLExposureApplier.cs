@@ -8,6 +8,7 @@ public class CAMCOLExposureApplier : MonoBehaviour
     private const float BaseIso = 100f;
     private const float BaseShutterSpeed = 1f / 125f;
     private const float BaseAperture = 5.6f;
+    private const float DefaultFocalLength = 50f;
     private const float PostExposureFloor = -6f;
     private const float PostExposureCeiling = 6f;
     private const float AutoMeteringStrength = 0.4f;
@@ -21,12 +22,19 @@ public class CAMCOLExposureApplier : MonoBehaviour
     [SerializeField] private Volume targetVolume;
     [Tooltip("Optional scene metering source. When assigned, actual rendered brightness also affects exposure.")]
     [SerializeField] private CAMMeteringBase metering;
+    [Tooltip("Optional focus source used to drive depth of field focus distance.")]
+    [SerializeField] private CAMFocusController focusController;
+    [Tooltip("Optional camera used to mirror focal length into the depth of field volume override.")]
+    [SerializeField] private Camera targetCamera;
 
     private ColorAdjustments colorAdjustments;
+    private DepthOfField depthOfField;
     private float lastIso = -1f;
     private float lastShutterSpeed = -1f;
     private float lastAperture = -1f;
     private float lastExposureCompensation = float.NaN;
+    private float lastFocusDistance = -1f;
+    private float lastFocalLength = -1f;
     private float autoMeteringOffset;
     private int lastAppliedMeteringVersion = -1;
     private bool warnedMissingSettings;
@@ -37,6 +45,8 @@ public class CAMCOLExposureApplier : MonoBehaviour
     {
         settings = GetComponent<CAMCOLCameraSettings>();
         metering = GetComponent<CAMMeteringBase>();
+        focusController = GetComponent<CAMFocusController>();
+        targetCamera = GetComponent<Camera>();
     }
 
     private void OnEnable()
@@ -57,6 +67,8 @@ public class CAMCOLExposureApplier : MonoBehaviour
             || !Mathf.Approximately(settings.ShutterSpeed, lastShutterSpeed)
             || !Mathf.Approximately(settings.Aperture, lastAperture)
             || !Mathf.Approximately(settings.ExposureCompensation, lastExposureCompensation)
+            || !Mathf.Approximately(GetCurrentFocusDistance(), lastFocusDistance)
+            || !Mathf.Approximately(GetCurrentFocalLength(), lastFocalLength)
             || HasMeteringChanged())
         {
             ApplyExposure(true);
@@ -78,7 +90,7 @@ public class CAMCOLExposureApplier : MonoBehaviour
     {
         EnsureReferences();
 
-        if (!settings || !EnsureColorAdjustments(logWarnings))
+        if (!settings || !EnsureVolumeOverrides(logWarnings))
         {
             return;
         }
@@ -107,10 +119,14 @@ public class CAMCOLExposureApplier : MonoBehaviour
         colorAdjustments.postExposure.overrideState = true;
         colorAdjustments.postExposure.value = postExposure;
 
+        ApplyDepthOfField();
+
         lastIso = settings.Iso;
         lastShutterSpeed = settings.ShutterSpeed;
         lastAperture = settings.Aperture;
         lastExposureCompensation = settings.ExposureCompensation;
+        lastFocusDistance = GetCurrentFocusDistance();
+        lastFocalLength = GetCurrentFocalLength();
     }
 
     private void EnsureReferences()
@@ -123,6 +139,31 @@ public class CAMCOLExposureApplier : MonoBehaviour
         if (!metering)
         {
             metering = GetComponent<CAMMeteringBase>();
+        }
+
+        if (!focusController)
+        {
+            focusController = GetComponent<CAMFocusController>();
+        }
+
+        if (!targetCamera)
+        {
+            targetCamera = GetComponent<Camera>();
+        }
+
+        if (!targetCamera && focusController)
+        {
+            targetCamera = focusController.GetComponent<Camera>();
+        }
+
+        if (!targetCamera)
+        {
+            targetCamera = Camera.main;
+        }
+
+        if (!focusController && targetCamera)
+        {
+            focusController = targetCamera.GetComponent<CAMFocusController>();
         }
 
         if (settings)
@@ -141,9 +182,9 @@ public class CAMCOLExposureApplier : MonoBehaviour
         return metering.ReadingVersion != lastAppliedMeteringVersion;
     }
 
-    private bool EnsureColorAdjustments(bool logWarnings)
+    private bool EnsureVolumeOverrides(bool logWarnings)
     {
-        if (colorAdjustments)
+        if (colorAdjustments && depthOfField)
         {
             return true;
         }
@@ -180,7 +221,12 @@ public class CAMCOLExposureApplier : MonoBehaviour
             colorAdjustments = profile.Add<ColorAdjustments>(true);
         }
 
-        return colorAdjustments;
+        if (!profile.TryGet(out depthOfField))
+        {
+            depthOfField = profile.Add<DepthOfField>(true);
+        }
+
+        return colorAdjustments && depthOfField;
     }
 
     private void WarnMissingSettings()
@@ -200,6 +246,47 @@ public class CAMCOLExposureApplier : MonoBehaviour
         float magnitude = Mathf.Max(0f, Mathf.Abs(meteredExposureOffset) - AutoMeteringDeadZone);
         float conservativeOffset = magnitude * AutoMeteringStrength * sign;
         return Mathf.Clamp(conservativeOffset, AutoMeteringFloor, AutoMeteringCeiling);
+    }
+
+    private void ApplyDepthOfField()
+    {
+        if (!depthOfField || !settings)
+        {
+            return;
+        }
+
+        depthOfField.active = true;
+        depthOfField.mode.overrideState = true;
+        depthOfField.mode.value = DepthOfFieldMode.Bokeh;
+
+        depthOfField.focusDistance.overrideState = true;
+        depthOfField.focusDistance.value = GetCurrentFocusDistance();
+
+        depthOfField.aperture.overrideState = true;
+        depthOfField.aperture.value = settings.Aperture;
+
+        depthOfField.focalLength.overrideState = true;
+        depthOfField.focalLength.value = GetCurrentFocalLength();
+    }
+
+    private float GetCurrentFocusDistance()
+    {
+        if (focusController)
+        {
+            return Mathf.Max(0.1f, focusController.FocusDistance);
+        }
+
+        return targetCamera ? Mathf.Max(0.1f, targetCamera.farClipPlane * 0.25f) : 10f;
+    }
+
+    private float GetCurrentFocalLength()
+    {
+        if (targetCamera && targetCamera.usePhysicalProperties)
+        {
+            return Mathf.Max(1f, targetCamera.focalLength);
+        }
+
+        return DefaultFocalLength;
     }
 
     private static float ComputeEv100(float aperture, float shutterSpeed, float iso)
