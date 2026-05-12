@@ -22,6 +22,9 @@ Shader "Custom/AuroraSpiritSpriteURP"
         _MaskScale ("Mask Scale", Range(0.1, 8)) = 2.4
         _EdgeFadeStart ("Edge Fade Start", Range(0, 1)) = 0.08
         _EdgeFadeEnd ("Edge Fade End", Range(0.01, 1)) = 0.42
+        _EdgeNoiseScale ("Edge Noise Scale", Range(0.1, 12)) = 4.5
+        _EdgeNoiseSpeed ("Edge Noise Speed", Range(-2, 2)) = 0.12
+        _EdgeNoiseStrength ("Edge Noise Strength", Range(0, 0.3)) = 0.08
         _EdgeGradientStrength ("Edge Gradient Strength", Range(0, 2)) = 0.7
         _EdgeGradientWidth ("Edge Gradient Width", Range(0.01, 1)) = 0.28
         _EdgeGradientSoftness ("Edge Gradient Softness", Range(0.01, 1)) = 0.18
@@ -94,6 +97,9 @@ Shader "Custom/AuroraSpiritSpriteURP"
                 half _MaskScale;
                 half _EdgeFadeStart;
                 half _EdgeFadeEnd;
+                half _EdgeNoiseScale;
+                half _EdgeNoiseSpeed;
+                half _EdgeNoiseStrength;
                 half _EdgeGradientStrength;
                 half _EdgeGradientWidth;
                 half _EdgeGradientSoftness;
@@ -182,10 +188,13 @@ Shader "Custom/AuroraSpiritSpriteURP"
                 half pulse = pow(saturate(0.5h + 0.5h * sin(time * _BreathSpeed * 6.2831853h)), _PulseSharpness);
                 half breath = 1.0h + ((pulse * 2.0h - 1.0h) * _BreathAmount);
 
-                half edgeFade = smoothstep(_EdgeFadeStart, max(_EdgeFadeStart + 0.001h, _EdgeFadeEnd), sourceAlpha);
+                float2 edgeNoiseUv = input.flowUv * _EdgeNoiseScale + float2(time * _EdgeNoiseSpeed, -time * (_EdgeNoiseSpeed * 0.73));
+                half edgeNoise = (half(FractalNoise(edgeNoiseUv)) - 0.5h) * 2.0h;
+                half noisyAlpha = saturate(sourceAlpha + edgeNoise * _EdgeNoiseStrength);
+                half edgeFade = smoothstep(_EdgeFadeStart, max(_EdgeFadeStart + 0.001h, _EdgeFadeEnd), noisyAlpha);
                 half edgeGlow = saturate(flow * 1.25h + pulse * 0.35h);
-                half edgeBand = 1.0h - smoothstep(_EdgeGradientWidth, _EdgeGradientWidth + _EdgeGradientSoftness, sourceAlpha);
-                edgeBand *= smoothstep(0.001h, 0.08h + _EdgeGradientSoftness, sourceAlpha);
+                half edgeBand = 1.0h - smoothstep(_EdgeGradientWidth, _EdgeGradientWidth + _EdgeGradientSoftness, noisyAlpha);
+                edgeBand *= smoothstep(0.001h, 0.08h + _EdgeGradientSoftness, noisyAlpha);
                 half edgeGradient = saturate(edgeBand * _EdgeGradientStrength);
 
                 half3 tint = lerp(_AuroraTint.rgb, _SecondaryTint.rgb, edgeGlow);

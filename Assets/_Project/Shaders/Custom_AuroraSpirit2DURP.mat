@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Custom_AuroraSpirit2DURP
-  m_Shader: {fileID: 4800000, guid: abf42c13a554b4e0da5b49a1ef2daa66, type: 3}
+  m_Shader: {fileID: 4800000, guid: 2ad7499199bc8421cbc977f49c2ae1ce, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -29,20 +29,31 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Alpha: 1
-    - _BreathAmount: 0.14
-    - _BreathSpeed: 0.75
-    - _DistortScale: 4
-    - _DistortStrength: 0.02
-    - _EmissionStrength: 2.5
-    - _FlowScale: 3.5
-    - _FlowSpeed: 0.08
+    - _Alpha: 1.08
+    - _BreathAmount: 0.44
+    - _BreathSpeed: 0.04
+    - _DistortScale: 4.5
+    - _DistortStrength: 0.018
+    - _EdgeFadeEnd: 0.48
+    - _EdgeFadeStart: 0.08
+    - _EdgeGradientSoftness: 1
+    - _EdgeGradientStrength: 2
+    - _EdgeGradientWidth: 1
+    - _EdgeNoiseScale: 12
+    - _EdgeNoiseSpeed: 0.45
+    - _EdgeNoiseStrength: 0.3
+    - _EmissionStrength: 1.4
+    - _FlowScale: 12
+    - _FlowSpeed: 0.93
     - _MaskBias: 0.08
     - _MaskScale: 2.4
-    - _PulseSharpness: 2.2
+    - _PulseSharpness: 1.58
     - _UseColorMask: 1
-    - _VerticalFade: 0.35
+    - _VerticalFade: 0.27
     m_Colors:
+    - _AuroraTint: {r: 0.65, g: 1, b: 0.86, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _EdgeTint: {r: 0.75, g: 1, b: 0.97999996, a: 1}
     - _SecondaryTint: {r: 0.45, g: 0.95, b: 1, a: 1}
     - _Tint: {r: 0.65, g: 1, b: 0.86, a: 1}
   m_BuildTextureStacks: []
