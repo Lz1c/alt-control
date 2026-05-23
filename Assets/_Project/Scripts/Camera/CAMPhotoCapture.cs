@@ -7,6 +7,10 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public class CAMPhotoCapture : MonoBehaviour
 {
+    private const float BaseIso = 100f;
+    private const float BaseShutterSpeed = 1f / 125f;
+    private const float BaseAperture = 5.6f;
+
     [Header("References")]
     [Tooltip("Scene-level simulated camera data source. This can live on a separate controller object.")]
     [SerializeField] private CAMCOLCameraSettings settings;
@@ -19,6 +23,8 @@ public class CAMPhotoCapture : MonoBehaviour
     [SerializeField] private RawImage previewImage;
     [Tooltip("Optional root object for the photo preview UI.")]
     [SerializeField] private GameObject previewRoot;
+    [Tooltip("Optional full-screen black Image shown during the shutter interval.")]
+    [SerializeField] private Image shutterBlackoutImage;
 
     [Header("Capture")]
     [SerializeField] private KeyCode halfPressKey = KeyCode.O;
@@ -30,6 +36,26 @@ public class CAMPhotoCapture : MonoBehaviour
     [SerializeField] private bool showPreviewAfterCapture = true;
     [SerializeField] private bool hidePreviewDuringCapture = true;
     [SerializeField] private float captureResolutionScale = 1f;
+
+    [Header("Aurora Capture Response")]
+    [Tooltip("How strongly aurora emissive sprites respond to camera exposure during the captured photo render only.")]
+    [SerializeField, Range(0f, 2f)] private float auroraPhotoExposureStrength = 0.45f;
+    [Tooltip("Extra influence from longer shutter speeds when photographing aurora. Real aurora photography usually benefits more from longer exposures than from simple global brightening.")]
+    [SerializeField, Range(0f, 2f)] private float auroraShutterSensitivity = 0.7f;
+    [Tooltip("Extra influence from higher ISO values when photographing aurora.")]
+    [SerializeField, Range(0f, 2f)] private float auroraIsoSensitivity = 0.35f;
+    [Tooltip("Limits how far the photo-only aurora response can be pushed.")]
+    [SerializeField, Range(0f, 3f)] private float auroraPhotoExposureClamp = 1.6f;
+    [Tooltip("Additional photo-only opacity boost so the aurora reads more clearly without simply becoming brighter.")]
+    [SerializeField, Range(1f, 3f)] private float auroraPhotoAlphaBoost = 1.35f;
+    [Tooltip("Reduces the apparent strength of edge fade during photo capture, making the shape hold together more clearly.")]
+    [SerializeField, Range(0f, 1f)] private float auroraPhotoFadeSoftening = 0.28f;
+    [Tooltip("Boosts the internal mask definition during photo capture so the aurora silhouette reads cleaner.")]
+    [SerializeField, Range(0f, 1f)] private float auroraPhotoDefinitionBoost = 0.18f;
+    [Tooltip("Stabilizes noisy fading edges during photo capture so the aurora outline reads more solid.")]
+    [SerializeField, Range(0f, 1f)] private float auroraPhotoEdgeStability = 0.35f;
+    [Tooltip("Reveals more internal ribbon detail during photo capture, closer to how long-exposure aurora photos hold structure.")]
+    [SerializeField, Range(0f, 1f)] private float auroraPhotoContentBoost = 0.25f;
 
     private bool isCapturing;
     private Texture2D lastPreviewTexture;
@@ -52,6 +78,15 @@ public class CAMPhotoCapture : MonoBehaviour
     private void OnValidate()
     {
         captureResolutionScale = Mathf.Clamp(captureResolutionScale, 0.25f, 4f);
+        auroraPhotoExposureStrength = Mathf.Max(0f, auroraPhotoExposureStrength);
+        auroraShutterSensitivity = Mathf.Max(0f, auroraShutterSensitivity);
+        auroraIsoSensitivity = Mathf.Max(0f, auroraIsoSensitivity);
+        auroraPhotoExposureClamp = Mathf.Max(0f, auroraPhotoExposureClamp);
+        auroraPhotoAlphaBoost = Mathf.Max(1f, auroraPhotoAlphaBoost);
+        auroraPhotoFadeSoftening = Mathf.Clamp01(auroraPhotoFadeSoftening);
+        auroraPhotoDefinitionBoost = Mathf.Clamp01(auroraPhotoDefinitionBoost);
+        auroraPhotoEdgeStability = Mathf.Clamp01(auroraPhotoEdgeStability);
+        auroraPhotoContentBoost = Mathf.Clamp01(auroraPhotoContentBoost);
     }
 
     private void Update()
@@ -136,6 +171,13 @@ public class CAMPhotoCapture : MonoBehaviour
             previewRoot.SetActive(false);
         }
 
+        bool restoreBlackout = shutterBlackoutImage && shutterBlackoutImage.gameObject.activeSelf;
+        if (shutterBlackoutImage)
+        {
+            shutterBlackoutImage.color = new Color(0f, 0f, 0f, 1f);
+            shutterBlackoutImage.gameObject.SetActive(true);
+        }
+
         Quaternion startRotation = motionBlurController
             ? motionBlurController.CaptureCameraRotation(targetCamera)
             : CaptureCameraRotation();
@@ -167,6 +209,12 @@ public class CAMPhotoCapture : MonoBehaviour
         CAMCOLMotionBlurController.LocalMotionBlurSample[] subjectMotionSamples = motionBlurController
             ? motionBlurController.CalculateSubjectMotionSamples(targetCamera, motionSubjects, startSubjectSnapshots, endSubjectSnapshots, captureWidth, captureHeight)
             : Array.Empty<CAMCOLMotionBlurController.LocalMotionBlurSample>();
+
+        if (shutterBlackoutImage)
+        {
+            shutterBlackoutImage.gameObject.SetActive(restoreBlackout);
+        }
+
         Texture2D photo = CaptureProcessedPhoto(captureWidth, captureHeight, motionSample, subjectMotionSamples);
 
         string savedPath = SavePhoto(photo);
@@ -195,6 +243,11 @@ public class CAMPhotoCapture : MonoBehaviour
             {
                 previewRoot.SetActive(restorePreviewRoot);
             }
+        }
+
+        if (shutterBlackoutImage)
+        {
+            shutterBlackoutImage.gameObject.SetActive(restoreBlackout);
         }
 
         isCapturing = false;
@@ -268,6 +321,23 @@ public class CAMPhotoCapture : MonoBehaviour
         RenderTexture previousTargetTexture = targetCamera.targetTexture;
         RenderTexture previousActive = RenderTexture.active;
         bool previousCameraEnabled = targetCamera.enabled;
+        float previousAuroraExposure = Shader.GetGlobalFloat("_SimulatedCameraExposureEV");
+        float previousAuroraMultiplier = Shader.GetGlobalFloat("_SimulatedCameraExposureMultiplier");
+        float previousAuroraAlphaBoost = Shader.GetGlobalFloat("_SimulatedAuroraPhotoAlphaBoost");
+        float previousAuroraFadeSoftening = Shader.GetGlobalFloat("_SimulatedAuroraPhotoFadeSoftening");
+        float previousAuroraDefinitionBoost = Shader.GetGlobalFloat("_SimulatedAuroraPhotoDefinitionBoost");
+        float previousAuroraEdgeStability = Shader.GetGlobalFloat("_SimulatedAuroraPhotoEdgeStability");
+        float previousAuroraContentBoost = Shader.GetGlobalFloat("_SimulatedAuroraPhotoContentBoost");
+
+        float auroraExposure = ComputeAuroraPhotoExposure();
+        float auroraClarity = ComputeAuroraPhotoClarity();
+        Shader.SetGlobalFloat("_SimulatedCameraExposureEV", auroraExposure);
+        Shader.SetGlobalFloat("_SimulatedCameraExposureMultiplier", Mathf.Pow(2f, auroraExposure));
+        Shader.SetGlobalFloat("_SimulatedAuroraPhotoAlphaBoost", Mathf.Lerp(1f, auroraPhotoAlphaBoost, auroraClarity));
+        Shader.SetGlobalFloat("_SimulatedAuroraPhotoFadeSoftening", auroraPhotoFadeSoftening * auroraClarity);
+        Shader.SetGlobalFloat("_SimulatedAuroraPhotoDefinitionBoost", auroraPhotoDefinitionBoost * auroraClarity);
+        Shader.SetGlobalFloat("_SimulatedAuroraPhotoEdgeStability", auroraPhotoEdgeStability * auroraClarity);
+        Shader.SetGlobalFloat("_SimulatedAuroraPhotoContentBoost", auroraPhotoContentBoost * auroraClarity);
 
         targetCamera.targetTexture = sourceRt;
         RenderTexture.active = sourceRt;
@@ -277,8 +347,58 @@ public class CAMPhotoCapture : MonoBehaviour
         targetCamera.targetTexture = previousTargetTexture;
         targetCamera.enabled = previousCameraEnabled;
         RenderTexture.active = previousActive;
+        Shader.SetGlobalFloat("_SimulatedCameraExposureEV", previousAuroraExposure);
+        Shader.SetGlobalFloat("_SimulatedCameraExposureMultiplier", previousAuroraMultiplier);
+        Shader.SetGlobalFloat("_SimulatedAuroraPhotoAlphaBoost", previousAuroraAlphaBoost);
+        Shader.SetGlobalFloat("_SimulatedAuroraPhotoFadeSoftening", previousAuroraFadeSoftening);
+        Shader.SetGlobalFloat("_SimulatedAuroraPhotoDefinitionBoost", previousAuroraDefinitionBoost);
+        Shader.SetGlobalFloat("_SimulatedAuroraPhotoEdgeStability", previousAuroraEdgeStability);
+        Shader.SetGlobalFloat("_SimulatedAuroraPhotoContentBoost", previousAuroraContentBoost);
 
         return sourceRt;
+    }
+
+    private float ComputeAuroraPhotoExposure()
+    {
+        if (!settings)
+        {
+            return 0f;
+        }
+
+        float baseEv = ComputeEv100(BaseAperture, BaseShutterSpeed, BaseIso);
+        float currentEv = ComputeEv100(settings.Aperture, settings.ShutterSpeed, settings.Iso);
+        float manualExposure = baseEv - currentEv + settings.ExposureCompensation;
+
+        float shutterStops = Mathf.Max(0f, Mathf.Log(settings.ShutterSpeed / BaseShutterSpeed, 2f));
+        float isoStops = Mathf.Max(0f, Mathf.Log(settings.Iso / BaseIso, 2f));
+        float photoWeightedExposure =
+            manualExposure * auroraPhotoExposureStrength
+            + shutterStops * auroraShutterSensitivity
+            + isoStops * auroraIsoSensitivity;
+
+        return Mathf.Clamp(photoWeightedExposure, -auroraPhotoExposureClamp, auroraPhotoExposureClamp);
+    }
+
+    private float ComputeAuroraPhotoClarity()
+    {
+        if (!settings)
+        {
+            return 0f;
+        }
+
+        float shutterStops = Mathf.Max(0f, Mathf.Log(settings.ShutterSpeed / BaseShutterSpeed, 2f));
+        float isoStops = Mathf.Max(0f, Mathf.Log(settings.Iso / BaseIso, 2f));
+        float apertureStops = Mathf.Max(0f, Mathf.Log(BaseAperture / Mathf.Max(0.01f, settings.Aperture), 2f));
+        float clarityStops = shutterStops * 0.55f + isoStops * 0.25f + apertureStops * 0.2f;
+        return Mathf.Clamp01(clarityStops / 4f);
+    }
+
+    private static float ComputeEv100(float aperture, float shutterSpeed, float iso)
+    {
+        aperture = Mathf.Max(0.01f, aperture);
+        shutterSpeed = Mathf.Max(0.0001f, shutterSpeed);
+        iso = Mathf.Max(1f, iso);
+        return Mathf.Log((aperture * aperture) / shutterSpeed * 100f / iso, 2f);
     }
 
     private static Texture2D ReadRenderTexture(RenderTexture renderTexture, int width, int height)

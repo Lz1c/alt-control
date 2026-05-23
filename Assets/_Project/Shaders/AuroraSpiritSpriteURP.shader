@@ -9,6 +9,10 @@ Shader "Custom/AuroraSpiritSpriteURP"
         _EdgeTint ("Edge Tint", Color) = (0.75, 1.0, 0.98, 1.0)
         _Alpha ("Alpha", Range(0, 2)) = 1
         _EmissionStrength ("Emission Strength", Range(0, 8)) = 2.5
+        _ExposureResponse ("Exposure Response", Range(0, 2)) = 0.45
+        _ExposureAlphaResponse ("Exposure Alpha Response", Range(0, 1)) = 0.03
+        _ExposureDarkenResponse ("Exposure Darken Response", Range(0, 1)) = 0.12
+        _ExposureMaxBoost ("Exposure Max Boost", Range(1, 4)) = 1.55
         _BreathSpeed ("Breath Speed", Range(0, 3)) = 0.75
         _BreathAmount ("Breath Amount", Range(0, 1)) = 0.14
         _FlowSpeed ("Flow Speed", Range(-2, 2)) = 0.08
@@ -75,6 +79,12 @@ Shader "Custom/AuroraSpiritSpriteURP"
 
             TEXTURE2D(_MainTex);
             SAMPLER(sampler_MainTex);
+            float _SimulatedCameraExposureEV;
+            float _SimulatedAuroraPhotoAlphaBoost;
+            float _SimulatedAuroraPhotoFadeSoftening;
+            float _SimulatedAuroraPhotoDefinitionBoost;
+            float _SimulatedAuroraPhotoEdgeStability;
+            float _SimulatedAuroraPhotoContentBoost;
 
             CBUFFER_START(UnityPerMaterial)
                 float4 _MainTex_ST;
@@ -84,6 +94,10 @@ Shader "Custom/AuroraSpiritSpriteURP"
                 half4 _EdgeTint;
                 half _Alpha;
                 half _EmissionStrength;
+                half _ExposureResponse;
+                half _ExposureAlphaResponse;
+                half _ExposureDarkenResponse;
+                half _ExposureMaxBoost;
                 half _BreathSpeed;
                 half _BreathAmount;
                 half _FlowSpeed;
@@ -181,8 +195,12 @@ Shader "Custom/AuroraSpiritSpriteURP"
 
                 half luminance = dot(tex.rgb, half3(0.2126h, 0.7152h, 0.0722h));
                 half greenDominance = tex.g - max(tex.r, tex.b) * 0.65h;
+                half contentMask = saturate(flow * 0.75h + greenDominance * 0.65h + luminance * 0.25h);
                 half computedMask = saturate((luminance * 0.75h + greenDominance - _MaskBias) * _MaskScale);
+                computedMask = saturate(computedMask + contentMask * _SimulatedAuroraPhotoContentBoost * 0.35h);
                 half sourceAlpha = lerp(tex.a, computedMask, _UseColorMask);
+                sourceAlpha = saturate(lerp(sourceAlpha, pow(sourceAlpha, 0.8h), _SimulatedAuroraPhotoDefinitionBoost));
+                sourceAlpha = saturate(sourceAlpha + _SimulatedAuroraPhotoContentBoost * 0.08h);
 
                 half verticalMask = saturate(lerp(1.0h, smoothstep(0.0h, 1.0h, input.flowUv.y), _VerticalFade));
                 half pulse = pow(saturate(0.5h + 0.5h * sin(time * _BreathSpeed * 6.2831853h)), _PulseSharpness);
@@ -190,19 +208,29 @@ Shader "Custom/AuroraSpiritSpriteURP"
 
                 float2 edgeNoiseUv = input.flowUv * _EdgeNoiseScale + float2(time * _EdgeNoiseSpeed, -time * (_EdgeNoiseSpeed * 0.73));
                 half edgeNoise = (half(FractalNoise(edgeNoiseUv)) - 0.5h) * 2.0h;
-                half noisyAlpha = saturate(sourceAlpha + edgeNoise * _EdgeNoiseStrength);
+                half edgeNoiseStrength = lerp(_EdgeNoiseStrength, _EdgeNoiseStrength * 0.2h, _SimulatedAuroraPhotoEdgeStability);
+                half noisyAlpha = saturate(sourceAlpha + edgeNoise * edgeNoiseStrength);
                 half edgeFade = smoothstep(_EdgeFadeStart, max(_EdgeFadeStart + 0.001h, _EdgeFadeEnd), noisyAlpha);
+                edgeFade = lerp(edgeFade, 1.0h, _SimulatedAuroraPhotoFadeSoftening);
                 half edgeGlow = saturate(flow * 1.25h + pulse * 0.35h);
                 half edgeBand = 1.0h - smoothstep(_EdgeGradientWidth, _EdgeGradientWidth + _EdgeGradientSoftness, noisyAlpha);
                 edgeBand *= smoothstep(0.001h, 0.08h + _EdgeGradientSoftness, noisyAlpha);
                 half edgeGradient = saturate(edgeBand * _EdgeGradientStrength);
+                half positiveExposure = max(0.0h, (half)_SimulatedCameraExposureEV);
+                half negativeExposure = max(0.0h, (half)(-_SimulatedCameraExposureEV));
+                half exposureBoost = min(_ExposureMaxBoost, 1.0h + positiveExposure * _ExposureResponse);
+                half exposureDarken = 1.0h / (1.0h + negativeExposure * _ExposureDarkenResponse);
+                half exposureMultiplier = exposureBoost * exposureDarken;
+                half exposureAlphaBoost = lerp(1.0h, exposureMultiplier, _ExposureAlphaResponse);
 
                 half3 tint = lerp(_AuroraTint.rgb, _SecondaryTint.rgb, edgeGlow);
                 tint = lerp(tint, _EdgeTint.rgb, edgeGradient);
 
-                half alpha = saturate(sourceAlpha * edgeFade * _Alpha * verticalMask * lerp(0.8h, 1.2h, flow));
+                half alpha = saturate(sourceAlpha * edgeFade * _Alpha * verticalMask * lerp(0.8h, 1.2h, flow) * exposureAlphaBoost * _SimulatedAuroraPhotoAlphaBoost);
                 half emissionMask = saturate(sourceAlpha * edgeFade * (0.65h + flow * 0.75h + edgeGradient * 0.45h) * verticalMask);
-                half3 color = tex.rgb * tint * emissionMask * _EmissionStrength * breath;
+                half luminanceWeight = saturate(pow(max(0.0001h, emissionMask), 0.65h));
+                half photoExposureResponse = lerp(1.0h, exposureMultiplier, luminanceWeight * (1.0h - _SimulatedAuroraPhotoContentBoost * 0.35h));
+                half3 color = tex.rgb * tint * emissionMask * _EmissionStrength * breath * photoExposureResponse;
 
                 return half4(color, alpha);
             }

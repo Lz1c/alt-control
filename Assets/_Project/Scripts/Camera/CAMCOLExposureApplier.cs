@@ -13,8 +13,6 @@ public class CAMCOLExposureApplier : MonoBehaviour
     private const float PostExposureCeiling = 6f;
     private const float AutoMeteringStrength = 0.4f;
     private const float AutoMeteringDeadZone = 0.2f;
-    private const float AutoMeteringFloor = -1.5f;
-    private const float AutoMeteringCeiling = 1.5f;
 
     [Header("References")]
     [Tooltip("Scene-level simulated camera data source. This can live on a separate controller object.")]
@@ -26,6 +24,18 @@ public class CAMCOLExposureApplier : MonoBehaviour
     [SerializeField] private CAMFocusController focusController;
     [Tooltip("Optional camera used to mirror focal length into the depth of field volume override.")]
     [SerializeField] private Camera targetCamera;
+
+    [Header("Auto Exposure")]
+    [Tooltip("Minimum and maximum automatic exposure offset applied from scene metering during half-press style auto exposure correction.")]
+    [SerializeField] private Vector2 autoMeteringOffsetLimits = new Vector2(-1.5f, 1.5f);
+
+    [Header("Realtime Exposure Response")]
+    [Tooltip("How strongly the computed exposure affects the luminance-aware fullscreen exposure pass.")]
+    [SerializeField, Range(0f, 1f)] private float realtimePostExposureStrength = 0.45f;
+    [Tooltip("Brightness level where realtime exposure starts to visibly affect pixels. Lower values brighten more of the image, higher values preserve darkness.")]
+    [SerializeField, Range(0f, 1f)] private float luminanceExposureThreshold = 0.06f;
+    [Tooltip("How gradually the luminance-aware exposure fades in above the threshold.")]
+    [SerializeField, Range(0.01f, 1f)] private float luminanceExposureSoftness = 0.24f;
 
     private ColorAdjustments colorAdjustments;
     private DepthOfField depthOfField;
@@ -52,7 +62,14 @@ public class CAMCOLExposureApplier : MonoBehaviour
     private void OnEnable()
     {
         EnsureReferences();
+        ResetAuroraExposureGlobals();
         ApplyExposure(true);
+    }
+
+    private void OnDisable()
+    {
+        ResetAuroraExposureGlobals();
+        ResetLuminanceExposureGlobals();
     }
 
     private void Update()
@@ -77,6 +94,10 @@ public class CAMCOLExposureApplier : MonoBehaviour
 
     private void OnValidate()
     {
+        SortLimits(ref autoMeteringOffsetLimits);
+        realtimePostExposureStrength = Mathf.Clamp01(realtimePostExposureStrength);
+        luminanceExposureThreshold = Mathf.Clamp01(luminanceExposureThreshold);
+        luminanceExposureSoftness = Mathf.Max(0.01f, luminanceExposureSoftness);
         EnsureReferences();
         ApplyExposure(false);
     }
@@ -103,7 +124,7 @@ public class CAMCOLExposureApplier : MonoBehaviour
         {
             if (metering.ReadingVersion != lastAppliedMeteringVersion)
             {
-                autoMeteringOffset = ComputeAutoMeteringOffset(metering.MeteredExposureOffset);
+                autoMeteringOffset = ComputeAutoMeteringOffset(metering.MeteredExposureOffset, AutoMeteringFloor, AutoMeteringCeiling);
                 lastAppliedMeteringVersion = metering.ReadingVersion;
             }
         }
@@ -113,11 +134,17 @@ public class CAMCOLExposureApplier : MonoBehaviour
             lastAppliedMeteringVersion = -1;
         }
 
-        float postExposure = Mathf.Clamp(manualExposure + autoMeteringOffset, PostExposureFloor, PostExposureCeiling);
+        float totalExposure = manualExposure + autoMeteringOffset;
+        float realtimePostExposure = Mathf.Clamp(totalExposure * realtimePostExposureStrength, PostExposureFloor, PostExposureCeiling);
 
         colorAdjustments.active = true;
         colorAdjustments.postExposure.overrideState = true;
-        colorAdjustments.postExposure.value = postExposure;
+        colorAdjustments.postExposure.value = 0f;
+
+        ResetAuroraExposureGlobals();
+        Shader.SetGlobalFloat("_SimulatedLuminanceExposureEV", realtimePostExposure);
+        Shader.SetGlobalFloat("_SimulatedLuminanceExposureThreshold", luminanceExposureThreshold);
+        Shader.SetGlobalFloat("_SimulatedLuminanceExposureSoftness", luminanceExposureSoftness);
 
         ApplyDepthOfField();
 
@@ -240,12 +267,43 @@ public class CAMCOLExposureApplier : MonoBehaviour
         warnedMissingSettings = true;
     }
 
-    private static float ComputeAutoMeteringOffset(float meteredExposureOffset)
+    private float AutoMeteringFloor => autoMeteringOffsetLimits.x;
+    private float AutoMeteringCeiling => autoMeteringOffsetLimits.y;
+
+    private static void ResetAuroraExposureGlobals()
+    {
+        Shader.SetGlobalFloat("_SimulatedCameraExposureEV", 0f);
+        Shader.SetGlobalFloat("_SimulatedCameraExposureMultiplier", 1f);
+        Shader.SetGlobalFloat("_SimulatedAuroraPhotoAlphaBoost", 1f);
+        Shader.SetGlobalFloat("_SimulatedAuroraPhotoFadeSoftening", 0f);
+        Shader.SetGlobalFloat("_SimulatedAuroraPhotoDefinitionBoost", 0f);
+        Shader.SetGlobalFloat("_SimulatedAuroraPhotoEdgeStability", 0f);
+        Shader.SetGlobalFloat("_SimulatedAuroraPhotoContentBoost", 0f);
+    }
+
+    private static void ResetLuminanceExposureGlobals()
+    {
+        Shader.SetGlobalFloat("_SimulatedLuminanceExposureEV", 0f);
+        Shader.SetGlobalFloat("_SimulatedLuminanceExposureThreshold", 0.06f);
+        Shader.SetGlobalFloat("_SimulatedLuminanceExposureSoftness", 0.24f);
+    }
+
+    private static float ComputeAutoMeteringOffset(float meteredExposureOffset, float floor, float ceiling)
     {
         float sign = Mathf.Sign(meteredExposureOffset);
         float magnitude = Mathf.Max(0f, Mathf.Abs(meteredExposureOffset) - AutoMeteringDeadZone);
         float conservativeOffset = magnitude * AutoMeteringStrength * sign;
-        return Mathf.Clamp(conservativeOffset, AutoMeteringFloor, AutoMeteringCeiling);
+        return Mathf.Clamp(conservativeOffset, floor, ceiling);
+    }
+
+    private static void SortLimits(ref Vector2 limits)
+    {
+        if (limits.x <= limits.y)
+        {
+            return;
+        }
+
+        limits = new Vector2(limits.y, limits.x);
     }
 
     private void ApplyDepthOfField()
