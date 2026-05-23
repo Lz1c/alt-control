@@ -57370,7 +57370,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   settings: {fileID: 1459574444}
   targetCamera: {fileID: 1106688657}
-  metering: {fileID: 1106688663}
+  metering: {fileID: 0}
   focusController: {fileID: 1106688662}
   isoController: {fileID: 1459574446}
   motionBlurController: {fileID: 1459574447}
@@ -77528,14 +77528,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3534487585e54be4d9357b9f4d5a7127, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  iso: 100
-  isoLimits: {x: 100, y: 6400}
-  shutterSpeed: 0.012691442
-  shutterSpeedLimits: {x: 0.001, y: 2}
-  aperture: 2.5
-  apertureLimits: {x: 1, y: 32}
-  exposureCompensation: 0
-  exposureCompensationLimits: {x: -5, y: 5}
 --- !u!114 &1459574445
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -77548,10 +77540,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2adb054701331d14bb1648ba0fbff417, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  settings: {fileID: 1459574444}
+  settings: {fileID: 0}
   targetVolume: {fileID: 230752982}
-  metering: {fileID: 1106688663}
-  focusController: {fileID: 1106688662}
+  metering: {fileID: 0}
+  focusController: {fileID: 0}
   targetCamera: {fileID: 1106688657}
   autoMeteringOffsetLimits: {x: -1, y: 1}
   realtimePostExposureStrength: 0.45
@@ -77569,12 +77561,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f4f12b6ad884bc4e842271b7b1f4b57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  settings: {fileID: 1459574444}
-  targetVolume: {fileID: 230752982}
-  isoNoiseThreshold: 3200
-  shutterNoiseThreshold: 1
-  maxSupportedIsoNoise: 3200
-  maxSupportedShutterNoise: 8
 --- !u!114 &1459574447
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -77587,7 +77573,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2e3c74ad25d4af4972a512b2e4a2d63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  settings: {fileID: 1459574444}
+  settings: {fileID: 0}
   subjectPixelsForFullBlur: 20
   subjectMotionSensitivity: 2.5
 --- !u!1001 &1462391010
