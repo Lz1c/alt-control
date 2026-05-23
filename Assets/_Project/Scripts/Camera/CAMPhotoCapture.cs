@@ -64,6 +64,8 @@ public class CAMPhotoCapture : MonoBehaviour
     public bool IsHalfPressActive { get; private set; }
     public CAMMeteringBase Metering => metering;
 
+    public static event Action PhotoSaved;
+
     private void Reset()
     {
         settings = GetComponent<CAMCOLCameraSettings>();
@@ -219,6 +221,7 @@ public class CAMPhotoCapture : MonoBehaviour
 
         string savedPath = SavePhoto(photo);
         Debug.Log($"Saved simulated photo to {savedPath}", this);
+        PhotoSaved?.Invoke();
 
         if (showPreviewAfterCapture && previewImage)
         {
