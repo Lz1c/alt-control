@@ -126,8 +126,29 @@ public static class CameraHudTools
         }
 
         AssetDatabase.CreateAsset(fontAsset, FontAssetPath);
+
+        // CreateFontAsset spawns a sub-material and atlas texture in memory but
+        // CreateAsset only persists fontAsset itself. Without explicitly adding the
+        // material and atlas as sub-assets, the references dangle after a reload,
+        // breaking TMP_BaseEditorPanel.GetMaterialPresets / DrawFont.
+        if (fontAsset.material)
+        {
+            fontAsset.material.name = "Material";
+            AssetDatabase.AddObjectToAsset(fontAsset.material, fontAsset);
+        }
+        if (fontAsset.atlasTexture)
+        {
+            fontAsset.atlasTexture.name = "Font Atlas";
+            AssetDatabase.AddObjectToAsset(fontAsset.atlasTexture, fontAsset);
+        }
+
+        EditorUtility.SetDirty(fontAsset);
         AssetDatabase.SaveAssets();
-        AssetDatabase.Refresh();
+        AssetDatabase.ImportAsset(FontAssetPath, ImportAssetOptions.ForceUpdate);
+
+        // Reload from disk so subsequent rebinds reference the persisted sub-assets,
+        // not the transient in-memory ones.
+        fontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontAssetPath);
 
         int rebound = RebindHudTextMeshesAndOutline(fontAsset);
         Debug.Log($"[CameraHudTools] Pixel-LCD SDF font asset at {FontAssetPath}, rebound {rebound} TMPs");
