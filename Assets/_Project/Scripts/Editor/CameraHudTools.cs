@@ -36,11 +36,14 @@ public static class CameraHudTools
 
         SaveTexture(BuildShotsCard(), "shots_card.png");
         SaveTexture(BuildBatteryCharge(), "battery_charge.png");
-        SaveTexture(BuildEvChecker(), "ev_checker.png");
+        SaveTexture(BuildEvScale(), "ev_scale.png");
+        SaveTexture(BuildEvPointer(), "ev_pointer.png");
+        SaveTexture(BuildAFBracket(), "af_bracket.png");
+        SaveTexture(BuildVignette(), "vignette.png");
 
         AssetDatabase.Refresh();
         ApplyIconImportSettings();
-        Debug.Log("[CameraHudTools] Generated 3 HUD icons -> " + IconDir);
+        Debug.Log("[CameraHudTools] Generated 6 HUD icons -> " + IconDir);
     }
 
     private static Texture2D BuildShotsCard()
@@ -72,16 +75,96 @@ public static class CameraHudTools
         return tex;
     }
 
-    private static Texture2D BuildEvChecker()
+    // Sony-style EV scale: 7 long integer ticks (EV -3..+3) + 6 short half-stop
+    // ticks + a top baseline. EV=0 is double-wide for emphasis. Width 120 → each
+    // integer step = 20 px (matches the pointer math in CAMCOLCameraSettingsTMPDisplay).
+    private static Texture2D BuildEvScale()
     {
-        const int W = 14, H = 14;
+        const int W = 120, H = 12;
         Texture2D tex = NewTransparent(W, H);
-        FillRect(tex, 0, H - 1, W, 1, Color.white);
-        FillRect(tex, 0, 0, W, 1, Color.white);
-        FillRect(tex, 0, 0, 1, H, Color.white);
-        FillRect(tex, W - 1, 0, 1, H, Color.white);
-        FillRect(tex, 1, 7, 6, 6, Color.white);
-        FillRect(tex, 7, 1, 6, 6, Color.white);
+
+        FillRect(tex, 0, 8, W, 1, Color.white);
+
+        for (int i = 0; i <= 6; i++)
+        {
+            int x = Mathf.RoundToInt(i * (W - 1) / 6f);
+            if (i == 3)
+            {
+                FillRect(tex, x - 1, 0, 2, 9, Color.white);
+            }
+            else
+            {
+                FillRect(tex, x, 0, 1, 8, Color.white);
+            }
+        }
+
+        for (int i = 0; i < 6; i++)
+        {
+            int x = Mathf.RoundToInt((i + 0.5f) * (W - 1) / 6f);
+            FillRect(tex, x, 0, 1, 4, Color.white);
+        }
+
+        tex.Apply();
+        return tex;
+    }
+
+    // 7×5 downward triangle pointer that sits above the EV scale and slides on EV change.
+    private static Texture2D BuildEvPointer()
+    {
+        const int W = 7, H = 5;
+        Texture2D tex = NewTransparent(W, H);
+        FillRect(tex, 0, 4, 7, 1, Color.white);
+        FillRect(tex, 1, 3, 5, 1, Color.white);
+        FillRect(tex, 2, 2, 3, 1, Color.white);
+        FillRect(tex, 3, 1, 1, 1, Color.white);
+        tex.Apply();
+        return tex;
+    }
+
+    // Sony-style AF bracket: 80×60 transparent, 4 corner L-shapes (12 px arm, 2 px thick).
+    private static Texture2D BuildAFBracket()
+    {
+        const int W = 80, H = 60, Arm = 12, Thick = 2;
+        Texture2D tex = NewTransparent(W, H);
+
+        // Top-left
+        FillRect(tex, 0, H - Thick, Arm, Thick, Color.white);
+        FillRect(tex, 0, H - Arm, Thick, Arm, Color.white);
+        // Top-right
+        FillRect(tex, W - Arm, H - Thick, Arm, Thick, Color.white);
+        FillRect(tex, W - Thick, H - Arm, Thick, Arm, Color.white);
+        // Bottom-left
+        FillRect(tex, 0, 0, Arm, Thick, Color.white);
+        FillRect(tex, 0, 0, Thick, Arm, Color.white);
+        // Bottom-right
+        FillRect(tex, W - Arm, 0, Arm, Thick, Color.white);
+        FillRect(tex, W - Thick, 0, Thick, Arm, Color.white);
+
+        tex.Apply();
+        return tex;
+    }
+
+    // Radial vignette 256×256: transparent center, edges fade to alpha ~160 black.
+    // SmoothStep at d∈[0.4, 1.0] keeps the inner ~40% completely clear.
+    private static Texture2D BuildVignette()
+    {
+        const int W = 256, H = 256;
+        Texture2D tex = NewTransparent(W, H);
+        Vector2 center = new Vector2((W - 1) * 0.5f, (H - 1) * 0.5f);
+        float maxDist = center.x;
+
+        Color32[] pixels = new Color32[W * H];
+        for (int y = 0; y < H; y++)
+        {
+            for (int x = 0; x < W; x++)
+            {
+                float d = Vector2.Distance(new Vector2(x, y), center) / maxDist;
+                float t = Mathf.SmoothStep(0.4f, 1.0f, d);
+                byte a = (byte)Mathf.Clamp(Mathf.RoundToInt(t * 160f), 0, 255);
+                pixels[y * W + x] = new Color32(0, 0, 0, a);
+            }
+        }
+        tex.SetPixels32(pixels);
         tex.Apply();
         return tex;
     }
@@ -152,6 +235,118 @@ public static class CameraHudTools
 
         int rebound = RebindHudTextMeshesAndOutline(fontAsset);
         Debug.Log($"[CameraHudTools] Pixel-LCD SDF font asset at {FontAssetPath}, rebound {rebound} TMPs");
+    }
+
+    // ---------------------------------------------------------------- Viewfinder
+
+    private const string ViewfinderRootName = "ViewfinderOverlay";
+    private const string VignettePath = IconDir + "/vignette.png";
+    private const string AFBracketPath = IconDir + "/af_bracket.png";
+
+    // Grid line color = white with alpha 0.30 (rule-of-thirds, no center horizon line).
+    private static readonly Color GridLineColor = new Color(1f, 1f, 1f, 0.30f);
+
+    // Reference resolution: Canvas scaleFactor 2.4 → UI-space 800×450.
+    // 9-grid third lines at x=±133, y=±75; AF bracket 80×60 centered.
+    private const float UiWidth = 800f;
+    private const float UiHeight = 450f;
+    private const float ThirdX = UiWidth / 6f;   // ≈133
+    private const float ThirdY = UiHeight / 6f;  // =75
+    private const float AFBracketWidth = 80f;
+    private const float AFBracketHeight = 60f;
+
+    [MenuItem("Tools/Camera HUD/Setup Viewfinder Overlay")]
+    public static void SetupViewfinderOverlay()
+    {
+        GameObject canvas = GameObject.Find("Canvas");
+        if (!canvas)
+        {
+            Debug.LogError("[CameraHudTools] Canvas not found in active scene");
+            return;
+        }
+
+        // Idempotent: nuke and re-create.
+        Transform existing = canvas.transform.Find(ViewfinderRootName);
+        if (existing)
+        {
+            Object.DestroyImmediate(existing.gameObject);
+        }
+
+        Sprite vignetteSprite = AssetDatabase.LoadAssetAtPath<Sprite>(VignettePath);
+        Sprite afSprite = AssetDatabase.LoadAssetAtPath<Sprite>(AFBracketPath);
+        if (!vignetteSprite || !afSprite)
+        {
+            Debug.LogError($"[CameraHudTools] Missing sprites — run Generate Icons first ({VignettePath}, {AFBracketPath})");
+            return;
+        }
+
+        GameObject root = new GameObject(ViewfinderRootName, typeof(RectTransform));
+        root.layer = LayerMask.NameToLayer("UI");
+        root.transform.SetParent(canvas.transform, false);
+        StretchFull((RectTransform)root.transform);
+        root.transform.SetAsFirstSibling();
+
+        // Vignette (full-screen radial)
+        GameObject vignette = NewUIChild(root.transform, "Vignette");
+        StretchFull((RectTransform)vignette.transform);
+        Image vimg = vignette.AddComponent<Image>();
+        vimg.sprite = vignetteSprite;
+        vimg.raycastTarget = false;
+
+        // GridOverlay (container + 5 line children)
+        GameObject grid = NewUIChild(root.transform, "GridOverlay");
+        StretchFull((RectTransform)grid.transform);
+        int lines = 0;
+        lines += AddLine(grid.transform, "VLine_L", -ThirdX, 0f, 1f, UiHeight, GridLineColor) ? 1 : 0;
+        lines += AddLine(grid.transform, "VLine_R", +ThirdX, 0f, 1f, UiHeight, GridLineColor) ? 1 : 0;
+        lines += AddLine(grid.transform, "HLine_T", 0f, +ThirdY, UiWidth, 1f, GridLineColor) ? 1 : 0;
+        lines += AddLine(grid.transform, "HLine_B", 0f, -ThirdY, UiWidth, 1f, GridLineColor) ? 1 : 0;
+
+        // AFBracket (centered)
+        GameObject af = NewUIChild(root.transform, "AFBracket");
+        RectTransform afRT = (RectTransform)af.transform;
+        afRT.anchorMin = afRT.anchorMax = new Vector2(0.5f, 0.5f);
+        afRT.pivot = new Vector2(0.5f, 0.5f);
+        afRT.anchoredPosition = Vector2.zero;
+        afRT.sizeDelta = new Vector2(AFBracketWidth, AFBracketHeight);
+        Image afImg = af.AddComponent<Image>();
+        afImg.sprite = afSprite;
+        afImg.raycastTarget = false;
+
+        EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+        Debug.Log($"[CameraHudTools] Viewfinder overlay built: vignette + {lines} grid lines + AF bracket");
+    }
+
+    private static GameObject NewUIChild(Transform parent, string name)
+    {
+        GameObject go = new GameObject(name, typeof(RectTransform));
+        go.layer = LayerMask.NameToLayer("UI");
+        go.transform.SetParent(parent, false);
+        return go;
+    }
+
+    private static void StretchFull(RectTransform rt)
+    {
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.offsetMin = Vector2.zero;
+        rt.offsetMax = Vector2.zero;
+        rt.localScale = Vector3.one;
+    }
+
+    private static bool AddLine(Transform parent, string name, float x, float y, float w, float h, Color color)
+    {
+        GameObject go = NewUIChild(parent, name);
+        RectTransform rt = (RectTransform)go.transform;
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = new Vector2(x, y);
+        rt.sizeDelta = new Vector2(w, h);
+        Image img = go.AddComponent<Image>();
+        img.color = color;
+        img.raycastTarget = false;
+        return true;
     }
 
     // ---------------------------------------------------------------- Outline

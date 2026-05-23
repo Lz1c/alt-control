@@ -43,6 +43,12 @@ public class CAMCOLCameraSettingsTMPDisplay : MonoBehaviour
     [SerializeField] private TMP_Text apertureText;
     [SerializeField] private TMP_Text exposureCompensationText;
 
+    [Header("EV Scale Pointer")]
+    [Tooltip("Triangle child of EVScale; X is driven by current EV. Scale spans 120 px → 20 px per EV step.")]
+    [SerializeField] private RectTransform evScalePointer;
+    [SerializeField] private float evScalePixelsPerStop = 20f;
+    [SerializeField] private float evScaleRangeStops = 3f;
+
     [Header("Status Text Outputs (top HUD)")]
     [SerializeField] private TMP_Text shotsRemainingText;
     [SerializeField] private TMP_Text aspectRatioText;
@@ -166,6 +172,16 @@ public class CAMCOLCameraSettingsTMPDisplay : MonoBehaviour
         SetText(shutterSpeedText, FormatShutterSpeed(lastShutterSpeed));
         SetText(apertureText, FormatAperture(lastAperture));
         SetText(exposureCompensationText, FormatExposureCompensation(lastExposureCompensation));
+        UpdateEvScalePointer(lastExposureCompensation);
+    }
+
+    private void UpdateEvScalePointer(float ev)
+    {
+        if (!evScalePointer) return;
+        float clamped = Mathf.Clamp(ev, -evScaleRangeStops, evScaleRangeStops);
+        Vector2 pos = evScalePointer.anchoredPosition;
+        pos.x = clamped * evScalePixelsPerStop;
+        evScalePointer.anchoredPosition = pos;
     }
 
     private void RefreshStatus(bool force)
