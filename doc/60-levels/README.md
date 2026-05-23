@@ -7,4 +7,4 @@
 
 | 编号 | 关名 | Boss 影 | 状态 |
 |---|---|---|---|
-| [01](01-shan.md) | 山（v2 唯一关卡）| ghost-feng-kou-shan-jun + ghost-shan-ding-shou-zhe | 🟡 In-Progress |
+| [01](01-shan.md) | 山（v2 唯一关卡）| ghost-shan-ding-shou-zhe（v2.1 唯一 Boss） | 🟡 In-Progress |

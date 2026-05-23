@@ -5,21 +5,21 @@
 
 ## 当前状态
 
-- **版本**：v2（2026-05-01 收紧后）
-- **Phase**：W1 — 设计冻结 + 资产入场
-- **当前关卡**：01 · 山（唯一一关）
-- **最后更新**：2026-05-01
+- **版本**：**v2.1**（2026-05-11 再收紧后）
+- **Phase**：W1 — 设计冻结 + 资产入场（延期至 5/10）
+- **当前关卡**：01 · 山（唯一一关，3 段山路）
+- **最后更新**：2026-05-11
 
-## v2 一句话
+## v2.1 一句话
 
-第一人称登山摄影 + 治愈小故事 + Cairn 风。一关，30-45 分钟。详见 [`../00-overview.md`](../00-overview.md)。
+第一人称登山摄影 + 治愈小故事 + Cairn 风。一关，**20-30 分钟**，**3 影**（跑山客 + 极光使 + 山顶守者）。详见 [`../00-overview.md`](../00-overview.md)。
 
 ## 下一步该做什么
 
-W1 设计文档刚写完，接下来：
+v2.1 设计文档刚改完，接下来：
 
 1. **答 4 个 🔥 阻塞问题**（见 [`open-questions.md`](open-questions.md)）：主角名 / 朋友名 / 山名 / 时长
-2. **`/audit-docs`** 检查 6 张新影卡 + `01-shan.md` 完成度
+2. **`/audit-docs`** 检查 3 张影卡 + `01-shan.md` v2.1 完成度
 3. **导入 Cairn 资产**到 Unity 项目（用户负责）
 4. **`/lock-level 01`** 把 01 山关锁定，进入 W2 实装
 
@@ -27,11 +27,11 @@ W1 设计文档刚写完，接下来：
 
 ## 索引
 
-- [roadmap.md](roadmap.md) — 4 周里程碑
-- [knowledge-lock-chain.md](knowledge-lock-chain.md) — 6 段山路 × 6 相机概念 × 6 笔记本页
+- [roadmap.md](roadmap.md) — 4 周里程碑（v2.1 时间窗）
+- [knowledge-lock-chain.md](knowledge-lock-chain.md) — **3 段山路 × 4 教学目标 × 3 笔记本页**
 - [decisions-log.md](decisions-log.md) — 已做的设计决定（最新在前）
 - [open-questions.md](open-questions.md) — 待决策清单
-- [rules-revisions.md](rules-revisions.md) — 规则层修订流水（v2 cutover 已归档）
+- [rules-revisions.md](rules-revisions.md) — 规则层修订流水（v2 cutover + v2.1 收紧都已归档）
 
 ## 状态图例
 
@@ -41,15 +41,16 @@ W1 设计文档刚写完，接下来：
 | 🟡 In-Progress | 正在做 | 当前作者改 |
 | 🔒 Locked-for-build | 文档冻结，进入实装 | 改要走 [rules-revisions](rules-revisions.md) 流程 |
 | ✅ Shipped | 实装通过验证 | 同上 |
-| ❌ 废止 | v1 内容已归档 | 不再维护 |
+| ❌ 废止 | v1 / v2.0 内容已归档 | 不再维护 |
 
 ## 当前阻塞
 
 - W1 启动前提：4 个 🔥 阻塞问题（[open-questions.md](open-questions.md)）
-- W1 启动前提：6 张新影卡未建（`doc/41-ghosts/`）
-- W1 启动前提：`60-levels/01-shan.md` 未建
+- W1 启动前提：~~6 张新影卡未建~~ → **3 张影卡已建** ✅（跑山客 / 极光使 / 山顶守者）
+- W1 启动前提：~~`60-levels/01-shan.md` 未建~~ → **已 v2.1 化** ✅
 - W1 启动前提：Cairn 场景资产未导入（用户侧）
 
-## v1 已彻底删除
+## 历史
 
-v2 收紧时被砍的卷（办公室 hub / 傩戏面具收集 / 8 张 v1 鬼卡 / 90-ref 傩戏调研 / Phase 0-N 多关计划）已物理从仓库删除——历史在 git log 里查（commit `738d070` 之前是 v1 状态）。详见 [`rules-revisions.md` 2026-05-01 v2 cutover](rules-revisions.md)。
+- **v1**（驱魔师 + 办公室 + 多关 + 傩戏面具）：2026-05-01 物理删除，详见 [`rules-revisions.md` 2026-05-01 v2 cutover](rules-revisions.md)
+- **v2.0**（6 段 + 6 影 + 2 Boss + 1 扑面）：2026-05-11 收紧到 v2.1，5 张影卡物理删除，详见 [`rules-revisions.md` 2026-05-11](rules-revisions.md)

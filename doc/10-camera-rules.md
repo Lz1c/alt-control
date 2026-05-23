@@ -16,22 +16,20 @@
 
 **硬边界**（代码里 `OnValidate` 强制）：ISO ≥ 1；快门 ≥ 0.0001 s；光圈 ≥ 0.1。
 
-### 解锁策略（v2：单关叙事驱动）
+### 解锁策略（v2.1：单关叙事驱动，3 段）
 
-> **2026-05-01 v2 收紧后**：不再是分关解锁，而是**单关内随登山段位 + 朋友笔记本翻页解锁参数旋钮**。具体节奏见 [`plan/knowledge-lock-chain.md`](plan/knowledge-lock-chain.md)。
+> **2026-05-11 v2.1 再收紧**：v2.0 的 6 段解锁表已被砍到 3 段。具体节奏见 [`plan/knowledge-lock-chain.md`](plan/knowledge-lock-chain.md)。
 
 | 段 | 解锁的参数边界（玩家可调到这一档） |
 |---|---|
 | 段 0 trailhead | 快门 1/250 – 1/60；ISO 100-400；光圈固定 f/4 |
-| 段 2 雾带 | 快门下限放到 **1s**（解锁慢档） |
-| 段 3 岩壁 | 快门上限放到 **1/2000**（解锁快档）；ISO 上限放到 800 |
-| 段 4 风口 | ISO 上限放到 **3200**（解锁噪点档） |
-| 段 5 星脊 | 快门下限放到 **8s**（解锁星轨长曝） |
-| 段 6 顶峰 | 解锁手动对焦 + 全光圈范围 **f/1.4 – f/16** |
+| 段 1 山道 | 快门上限放到 **1/2000**（解锁快档）；ISO 上限放到 800 |
+| 段 2 夜脊 | 快门下限放到 **15s**（解锁长曝）；ISO 上限放到 3200；光圈放到 **f/2.8 - f/4** |
+| 段 3 顶峰 | 解锁手动对焦 + 全光圈范围 **f/1.4 – f/16** |
 
-**实装做法**：`CAMCOLCameraSettings` 上的 `isoLimits` / `shutterSpeedLimits` / `apertureLimits` 三个 `Vector2` 字段在游戏里**动态收紧**，由段位事件触发"放开一档"。代码默认值（写在 `CAMCOLCameraSettings.cs`）对应段 6 全开状态；实装时初始关卡 awake 阶段写入 trailhead 收紧值。
+**实装做法**：`CAMCOLCameraSettings` 上的 `isoLimits` / `shutterSpeedLimits` / `apertureLimits` 三个 `Vector2` 字段在游戏里**动态收紧**，由段位事件触发"放开一档"。代码默认值（写在 `CAMCOLCameraSettings.cs`）对应段 3 全开状态；实装时初始关卡 awake 阶段写入 trailhead 收紧值。
 
-**v1 多关解锁表已废**（详见 `plan/rules-revisions.md` 2026-05-01 条目）。
+**v1 多关解锁表 + v2.0 6 段表已废**（详见 `plan/rules-revisions.md` 2026-05-01 + 2026-05-11 条目）。
 
 ## 曝光（EV100）
 
@@ -158,7 +156,7 @@ EV100 = log2( (A² / T) × (100 / ISO) )
 | ISO 噪点强度 | ≤ 0.5 | ≤ 0.2 | 15 |
 | Boss 占屏比 | ≥ Boss 阈值 | ≥ 阈值 × 2 | 10 |
 
-**Boss 过线门槛**：每只 Boss 影在影卡里写自己的 `passingScore`（v2 单关版：扰乱破冰 = 50；扰乱中段 = 60；Boss A 风口 = 65；Boss B 顶峰 = 70）。
+**Boss 过线门槛**：每只影在影卡里写自己的 `passingScore`（v2.1 单关版：扰乱 = 60；Boss 山顶守者 = 70）。
 
 **扰乱影判定**：只要"位于画面中央" + "对焦误差 ≤ 30%" 满足即可记一次"拍到"，触发笔记本对应页解锁。
 

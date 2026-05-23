@@ -1,7 +1,7 @@
 # 策划案 · 目录
 
-> **2026-05-01 v2 收紧后版本**。一个月交作业，单关登山治愈版。
-> v1（驱魔师 + 多关 + 傩戏面具）已归档，详见 [`plan/decisions-log.md` 2026-05-01](plan/decisions-log.md) 与 [`plan/rules-revisions.md`](plan/rules-revisions.md)。
+> **2026-05-01 v2 收紧 + 2026-05-11 v2.1 再收紧**。一个月交作业，单关登山治愈版。
+> v1（驱魔师 + 多关 + 傩戏面具）已归档；v2.0 的 6 影骨架在 v2.1 砍到 3 影（跑山客 + 极光使 + 山顶守者）。详见 [`plan/decisions-log.md`](plan/decisions-log.md) 与 [`plan/rules-revisions.md`](plan/rules-revisions.md)。
 
 像 D&D 规则书一样组织：**规则卷** 定死数值和判定，**条目卷**（关卡 / 影）填内容。
 
@@ -13,7 +13,7 @@
 | 10 | [camera-rules.md](10-camera-rules.md) | **规则书**：相机参数、EV、测光、拍照判定 | 做相机 / 调数值 / 设计影的拍照条件 |
 | 30 | [level-design.md](30-level-design.md) | **关卡结构**（v2 单关线性登山） | 改关卡模板时 |
 | 40 | [ghost-rules.md](40-ghost-rules.md) | **影规则**：Boss 影 + 扰乱影两种模板、通用字段 | 加新影之前 |
-| 41 | [41-ghosts/](41-ghosts/) | 每只影一个 md（v2 = 6 张） | 查 / 写具体影 |
+| 41 | [41-ghosts/](41-ghosts/) | 每只影一个 md（**v2.1 = 3 张**：跑山客 / 极光使 / 山顶守者） | 查 / 写具体影 |
 | 45 | [45-uncanny.md](45-uncanny.md) | **诡异调味规则书**：v2 治愈基调下允许的恐怖元素边界 + SCP 风分类 | 设计 jumpscare / 诡异事件之前 |
 | 60 | [60-levels/](60-levels/) | 关卡条目（v2 = 唯一关 [`01-shan.md`](60-levels/01-shan.md)） | 改具体关卡时 |
 | 70 | [narrative.md](70-narrative.md) | 主角 / 朋友 / 山的叙事骨架 | 写故事文案时 |
