@@ -12,7 +12,6 @@ public class CAMEvaluativeMetering : CAMMeteringBase
     }
 
     [Header("Evaluative")]
-    [SerializeField] private CAMFocusController focusController;
     [SerializeField] private int zoneColumns = 8;
     [SerializeField] private int zoneRows = 5;
     [SerializeField] private float centerWeight = 1.35f;

@@ -6,10 +6,12 @@ public abstract class CAMMeteringBase : MonoBehaviour
     [Header("References")]
     [SerializeField] protected Camera targetCamera;
     [SerializeField] protected Button meteringButton;
+    [SerializeField] protected CAMFocusController focusController;
 
     [Header("Metering")]
     [SerializeField] protected float targetMiddleGray = 0.18f;
     [SerializeField] protected KeyCode meteringKey = KeyCode.M;
+    [SerializeField] protected bool focusOnMetering = true;
     [SerializeField] protected int renderSampleSize = 256;
 
     protected Texture2D sampleTexture;
@@ -23,6 +25,7 @@ public abstract class CAMMeteringBase : MonoBehaviour
     protected virtual void Reset()
     {
         targetCamera = GetComponent<Camera>();
+        focusController = GetComponent<CAMFocusController>();
     }
 
     protected virtual void OnEnable()
@@ -70,6 +73,11 @@ public abstract class CAMMeteringBase : MonoBehaviour
 
         warnedMissingCamera = false;
 
+        if (focusOnMetering)
+        {
+            focusController?.FocusCenterOnce();
+        }
+
         int width = renderSampleSize;
         int height = Mathf.Max(32, Mathf.RoundToInt(renderSampleSize / Mathf.Max(0.1f, targetCamera.aspect)));
         EnsureSampleTexture(width, height);
@@ -108,6 +116,16 @@ public abstract class CAMMeteringBase : MonoBehaviour
         if (!targetCamera)
         {
             targetCamera = Camera.main;
+        }
+
+        if (!focusController)
+        {
+            focusController = GetComponent<CAMFocusController>();
+        }
+
+        if (!focusController && targetCamera)
+        {
+            focusController = targetCamera.GetComponent<CAMFocusController>();
         }
     }
 
