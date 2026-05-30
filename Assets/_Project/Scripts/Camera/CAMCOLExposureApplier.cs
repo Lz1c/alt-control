@@ -13,6 +13,7 @@ public class CAMCOLExposureApplier : MonoBehaviour
     private const float PostExposureCeiling = 6f;
     private const float AutoMeteringStrength = 0.4f;
     private const float AutoMeteringDeadZone = 0.2f;
+    private const float DefaultFocusClearRange = 2f;
 
     [Header("References")]
     [Tooltip("Scene-level simulated camera data source. This can live on a separate controller object.")]
@@ -44,6 +45,7 @@ public class CAMCOLExposureApplier : MonoBehaviour
     private float lastAperture = -1f;
     private float lastExposureCompensation = float.NaN;
     private float lastFocusDistance = -1f;
+    private float lastFocusClearRange = -1f;
     private float lastFocalLength = -1f;
     private float autoMeteringOffset;
     private int lastAppliedMeteringVersion = -1;
@@ -85,6 +87,7 @@ public class CAMCOLExposureApplier : MonoBehaviour
             || !Mathf.Approximately(settings.Aperture, lastAperture)
             || !Mathf.Approximately(settings.ExposureCompensation, lastExposureCompensation)
             || !Mathf.Approximately(GetCurrentFocusDistance(), lastFocusDistance)
+            || !Mathf.Approximately(settings.FocusClearRange, lastFocusClearRange)
             || !Mathf.Approximately(GetCurrentFocalLength(), lastFocalLength)
             || HasMeteringChanged())
         {
@@ -145,6 +148,7 @@ public class CAMCOLExposureApplier : MonoBehaviour
         Shader.SetGlobalFloat("_SimulatedLuminanceExposureEV", realtimePostExposure);
         Shader.SetGlobalFloat("_SimulatedLuminanceExposureThreshold", luminanceExposureThreshold);
         Shader.SetGlobalFloat("_SimulatedLuminanceExposureSoftness", luminanceExposureSoftness);
+        ApplyFocusIntervalGlobals();
 
         ApplyDepthOfField();
 
@@ -153,6 +157,7 @@ public class CAMCOLExposureApplier : MonoBehaviour
         lastAperture = settings.Aperture;
         lastExposureCompensation = settings.ExposureCompensation;
         lastFocusDistance = GetCurrentFocusDistance();
+        lastFocusClearRange = settings.FocusClearRange;
         lastFocalLength = GetCurrentFocalLength();
     }
 
@@ -188,6 +193,16 @@ public class CAMCOLExposureApplier : MonoBehaviour
             targetCamera = Camera.main;
         }
 
+        if (targetCamera)
+        {
+            targetCamera.depthTextureMode |= DepthTextureMode.Depth;
+            UniversalAdditionalCameraData cameraData = targetCamera.GetComponent<UniversalAdditionalCameraData>();
+            if (cameraData)
+            {
+                cameraData.requiresDepthTexture = true;
+            }
+        }
+
         if (!focusController && targetCamera)
         {
             focusController = targetCamera.GetComponent<CAMFocusController>();
@@ -211,7 +226,7 @@ public class CAMCOLExposureApplier : MonoBehaviour
 
     private bool EnsureVolumeOverrides(bool logWarnings)
     {
-        if (colorAdjustments && depthOfField)
+        if (colorAdjustments)
         {
             return true;
         }
@@ -248,12 +263,9 @@ public class CAMCOLExposureApplier : MonoBehaviour
             colorAdjustments = profile.Add<ColorAdjustments>(true);
         }
 
-        if (!profile.TryGet(out depthOfField))
-        {
-            depthOfField = profile.Add<DepthOfField>(true);
-        }
+        profile.TryGet(out depthOfField);
 
-        return colorAdjustments && depthOfField;
+        return colorAdjustments;
     }
 
     private void WarnMissingSettings()
@@ -286,6 +298,11 @@ public class CAMCOLExposureApplier : MonoBehaviour
         Shader.SetGlobalFloat("_SimulatedLuminanceExposureEV", 0f);
         Shader.SetGlobalFloat("_SimulatedLuminanceExposureThreshold", 0.06f);
         Shader.SetGlobalFloat("_SimulatedLuminanceExposureSoftness", 0.24f);
+        Shader.SetGlobalFloat("_SimulatedFocusDistance", 10f);
+        Shader.SetGlobalFloat("_SimulatedFocusClearRange", DefaultFocusClearRange);
+        Shader.SetGlobalFloat("_SimulatedFocusBlurStrength", 0f);
+        Shader.SetGlobalFloat("_SimulatedFocusBlurRadius", 0f);
+        Shader.SetGlobalFloat("_SimulatedFocusBokehHighlightBoost", 0f);
     }
 
     private static float ComputeAutoMeteringOffset(float meteredExposureOffset, float floor, float ceiling)
@@ -308,28 +325,40 @@ public class CAMCOLExposureApplier : MonoBehaviour
 
     private void ApplyDepthOfField()
     {
-        if (!depthOfField || !settings)
+        if (!depthOfField)
         {
             return;
         }
 
-        depthOfField.active = true;
-        depthOfField.mode.overrideState = true;
-        depthOfField.mode.value = DepthOfFieldMode.Bokeh;
+        depthOfField.active = false;
+    }
 
-        depthOfField.focusDistance.overrideState = true;
-        depthOfField.focusDistance.value = GetCurrentFocusDistance();
+    private void ApplyFocusIntervalGlobals()
+    {
+        float focusDistance = GetCurrentFocusDistance();
+        float focalLength = GetCurrentFocalLength();
+        float aperture = Mathf.Max(0.1f, settings.Aperture);
+        float apertureBlur = Mathf.Clamp(BaseAperture / aperture, 0.05f, 6f);
+        float focalLengthBlur = Mathf.Clamp(focalLength / DefaultFocalLength, 0.25f, 4f);
+        float focusRangeBlur = Mathf.Clamp(DefaultFocusClearRange / Mathf.Max(0.1f, settings.FocusClearRange), 0.2f, 4f);
+        float blurStrength = Mathf.Clamp(apertureBlur * focalLengthBlur * focusRangeBlur, 0f, 8f);
+        float bokehHighlightBoost = Mathf.Clamp((apertureBlur - 0.75f) * 1.2f, 0.5f, 4f);
 
-        depthOfField.aperture.overrideState = true;
-        depthOfField.aperture.value = settings.Aperture;
-
-        depthOfField.focalLength.overrideState = true;
-        depthOfField.focalLength.value = GetCurrentFocalLength();
+        Shader.SetGlobalFloat("_SimulatedFocusDistance", focusDistance);
+        Shader.SetGlobalFloat("_SimulatedFocusClearRange", Mathf.Max(0.1f, settings.FocusClearRange));
+        Shader.SetGlobalFloat("_SimulatedFocusBlurStrength", blurStrength);
+        Shader.SetGlobalFloat("_SimulatedFocusBlurRadius", 7f);
+        Shader.SetGlobalFloat("_SimulatedFocusBokehHighlightBoost", bokehHighlightBoost);
     }
 
     private float GetCurrentFocusDistance()
     {
-        if (focusController)
+        if (settings)
+        {
+            return Mathf.Max(0.1f, settings.FocusDistance);
+        }
+
+        if (focusController && focusController.HasFocusLock)
         {
             return Mathf.Max(0.1f, focusController.FocusDistance);
         }
@@ -339,6 +368,11 @@ public class CAMCOLExposureApplier : MonoBehaviour
 
     private float GetCurrentFocalLength()
     {
+        if (settings)
+        {
+            return Mathf.Max(1f, settings.FocalLength);
+        }
+
         if (targetCamera && targetCamera.usePhysicalProperties)
         {
             return Mathf.Max(1f, targetCamera.focalLength);

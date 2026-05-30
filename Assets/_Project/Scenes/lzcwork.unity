@@ -57316,12 +57316,12 @@ PrefabInstance:
     - target: {fileID: 5561527052464464600, guid: 172f9386e5ef58a49a21a05b76f23f37,
         type: 3}
       propertyPath: field of view
-      value: 60.000004
+      value: 26.991467
       objectReference: {fileID: 0}
     - target: {fileID: 5561527052464464600, guid: 172f9386e5ef58a49a21a05b76f23f37,
         type: 3}
       propertyPath: m_FocalLength
-      value: 20.78461
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 5561527052464464600, guid: 172f9386e5ef58a49a21a05b76f23f37,
         type: 3}
@@ -57455,7 +57455,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_RenderShadows: 1
-  m_RequiresDepthTextureOption: 2
+  m_RequiresDepthTextureOption: 1
   m_RequiresOpaqueTextureOption: 2
   m_CameraType: 0
   m_Cameras: []
@@ -57589,8 +57589,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetCamera: {fileID: 1106688657}
   focusButton: {fileID: 0}
+  settings: {fileID: 0}
   focusKey: 102
   maxFocusDistance: 500
+  focusTransitionDuration: 0.35
   focusLayers:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -57608,8 +57610,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetCamera: {fileID: 1106688657}
   meteringButton: {fileID: 0}
+  focusController: {fileID: 1106688662}
   targetMiddleGray: 0.18
   meteringKey: 109
+  focusOnMetering: 1
   renderSampleSize: 256
   focusController: {fileID: 1106688662}
   zoneColumns: 8
@@ -75244,6 +75248,9 @@ MonoBehaviour:
   isoText: {fileID: 1268365787}
   shutterSpeedText: {fileID: 1682864894}
   apertureText: {fileID: 200059480}
+  focalLengthText: {fileID: 0}
+  focusDistanceText: {fileID: 0}
+  focusClearRangeText: {fileID: 0}
   exposureCompensationText: {fileID: 2140702025}
 --- !u!1001 &1415228131
 PrefabInstance:
@@ -77821,6 +77828,8 @@ GameObject:
   - component: {fileID: 1459574446}
   - component: {fileID: 1459574445}
   - component: {fileID: 1459574444}
+  - component: {fileID: 1459574448}
+  - component: {fileID: 1459574449}
   m_Layer: 0
   m_Name: camera_effect_control
   m_TagString: Untagged
@@ -77858,9 +77867,15 @@ MonoBehaviour:
   iso: 100
   isoLimits: {x: 100, y: 6400}
   shutterSpeed: 0.008000001
-  shutterSpeedLimits: {x: 0.001, y: 0.06666667}
+  shutterSpeedLimits: {x: 0.001, y: 6}
   aperture: 5.6
   apertureLimits: {x: 1, y: 32}
+  focalLength: 24
+  focalLengthLimits: {x: 24, y: 70}
+  focusDistance: 0.2
+  focusDistanceLimits: {x: 0.2, y: 500}
+  focusClearRange: 3
+  focusClearRangeLimits: {x: 0.1, y: 100}
   exposureCompensation: 0
   exposureCompensationLimits: {x: -3, y: 3}
 --- !u!114 &1459574445
@@ -77898,9 +77913,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   settings: {fileID: 1459574444}
   targetVolume: {fileID: 230752982}
-  isoNoiseThreshold: 6400
+  isoNoiseThreshold: 3400
   shutterNoiseThreshold: 1
-  maxSupportedIsoNoise: 25600
+  maxSupportedIsoNoise: 149900
   maxSupportedShutterNoise: 8
 --- !u!114 &1459574447
 MonoBehaviour:
@@ -77917,6 +77932,63 @@ MonoBehaviour:
   settings: {fileID: 1459574444}
   subjectPixelsForFullBlur: 20
   subjectMotionSensitivity: 2.5
+--- !u!114 &1459574448
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1459574442}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82015ab5323f4996b4c1e768d7ab5392, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  settings: {fileID: 1459574444}
+  decreaseIsoKey: 282
+  increaseIsoKey: 283
+  fasterShutterKey: 284
+  slowerShutterKey: 285
+  closeApertureKey: 286
+  openApertureKey: 287
+  apertureStepStops: 0.5
+  decreaseFocalLengthKey: 288
+  increaseFocalLengthKey: 289
+  focalLengthUnitsPerSecond: 40
+  decreaseFocusDistanceKey: 290
+  increaseFocusDistanceKey: 291
+  nearFocusUnitsPerSecond: 0.5
+  focusSpeedRatio: 0.3
+  maxFocusUnitsPerSecond: 1000
+  decreaseFocusClearRangeKey: 0
+  increaseFocusClearRangeKey: 0
+  focusClearRangeUnitsPerSecond: 3
+  decreaseExposureCompensationKey: 292
+  increaseExposureCompensationKey: 293
+  alternateDecreaseExposureCompensationKey: 45
+  alternateIncreaseExposureCompensationKey: 61
+  exposureCompensationStopsPerSecond: 1
+--- !u!114 &1459574449
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1459574442}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c0fdf63cc844d6d8820123462a57ca9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetCamera: {fileID: 1106688657}
+  focusButton: {fileID: 0}
+  settings: {fileID: 1459574444}
+  focusKey: 111
+  maxFocusDistance: 500
+  focusTransitionDuration: 0.35
+  focusLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1001 &1462391010
 PrefabInstance:
   m_ObjectHideFlags: 0

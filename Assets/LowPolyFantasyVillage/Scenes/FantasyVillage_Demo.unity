@@ -77362,9 +77362,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   iso: 100
-  isoLimits: {x: 100, y: 6400}
+  isoLimits: {x: 50, y: 6400}
   shutterSpeed: 0.008000001
-  shutterSpeedLimits: {x: 0.001, y: 0.06666667}
+  shutterSpeedLimits: {x: 0.001, y: 6}
   aperture: 5.6
   apertureLimits: {x: 1, y: 32}
   exposureCompensation: 0
