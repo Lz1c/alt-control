@@ -7,26 +7,33 @@ public class CAMFocusController : MonoBehaviour
     [Header("References")]
     [SerializeField] private Camera targetCamera;
     [SerializeField] private Button focusButton;
+    [SerializeField] private CAMCOLCameraSettings settings;
 
     [Header("Focus")]
     [SerializeField] private KeyCode focusKey = KeyCode.None;
     [SerializeField] private float maxFocusDistance = 500f;
+    [SerializeField] private float focusTransitionDuration = 0.35f;
     [SerializeField] private LayerMask focusLayers = ~0;
 
     private bool warnedMissingCamera;
+    private float targetFocusDistance = 10f;
+    private float focusVelocity;
 
     public bool HasFocusLock { get; private set; }
     public float FocusDistance { get; private set; } = 10f;
     public Vector3 FocusPoint { get; private set; }
+    public bool IsFocusTransitioning => !Mathf.Approximately(FocusDistance, targetFocusDistance);
 
     private void Reset()
     {
         targetCamera = GetComponent<Camera>();
+        settings = GetComponent<CAMCOLCameraSettings>();
     }
 
     private void OnEnable()
     {
         EnsureReferences();
+        InitializeFocusDistanceFromSettings();
 
         if (focusButton)
         {
@@ -48,11 +55,14 @@ public class CAMFocusController : MonoBehaviour
         {
             FocusCenterOnce();
         }
+
+        UpdateFocusTransition();
     }
 
     private void OnValidate()
     {
         maxFocusDistance = Mathf.Max(0.1f, maxFocusDistance);
+        focusTransitionDuration = Mathf.Max(0f, focusTransitionDuration);
         EnsureReferences();
     }
 
@@ -72,14 +82,50 @@ public class CAMFocusController : MonoBehaviour
         if (Physics.Raycast(centerRay, out RaycastHit hit, maxFocusDistance, focusLayers, QueryTriggerInteraction.Ignore))
         {
             FocusPoint = hit.point;
-            FocusDistance = hit.distance;
+            SetTargetFocusDistance(hit.distance);
             HasFocusLock = true;
             return;
         }
 
         FocusPoint = centerRay.origin + centerRay.direction * maxFocusDistance;
-        FocusDistance = maxFocusDistance;
+        SetTargetFocusDistance(maxFocusDistance);
         HasFocusLock = false;
+    }
+
+    private void SetTargetFocusDistance(float value)
+    {
+        targetFocusDistance = Mathf.Max(0.1f, value);
+
+        if (focusTransitionDuration <= 0f)
+        {
+            FocusDistance = targetFocusDistance;
+            focusVelocity = 0f;
+            SyncSettingsFocusDistance();
+        }
+    }
+
+    private void UpdateFocusTransition()
+    {
+        if (focusTransitionDuration <= 0f)
+        {
+            FocusDistance = targetFocusDistance;
+            SyncSettingsFocusDistance();
+            return;
+        }
+
+        if (Mathf.Approximately(FocusDistance, targetFocusDistance))
+        {
+            return;
+        }
+
+        FocusDistance = Mathf.SmoothDamp(
+            FocusDistance,
+            targetFocusDistance,
+            ref focusVelocity,
+            focusTransitionDuration,
+            Mathf.Infinity,
+            Time.deltaTime);
+        SyncSettingsFocusDistance();
     }
 
     private void EnsureReferences()
@@ -93,6 +139,33 @@ public class CAMFocusController : MonoBehaviour
         {
             targetCamera = Camera.main;
         }
+
+        if (!settings)
+        {
+            settings = GetComponent<CAMCOLCameraSettings>();
+        }
+
+        if (!settings && targetCamera)
+        {
+            settings = targetCamera.GetComponent<CAMCOLCameraSettings>();
+        }
+    }
+
+    private void InitializeFocusDistanceFromSettings()
+    {
+        if (!settings)
+        {
+            return;
+        }
+
+        FocusDistance = Mathf.Max(0.1f, settings.FocusDistance);
+        targetFocusDistance = FocusDistance;
+        focusVelocity = 0f;
+    }
+
+    private void SyncSettingsFocusDistance()
+    {
+        settings?.SetFocusDistance(FocusDistance);
     }
 
     private void WarnMissingCamera()

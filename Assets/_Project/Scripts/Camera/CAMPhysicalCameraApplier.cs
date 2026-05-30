@@ -12,6 +12,7 @@ public class CAMPhysicalCameraApplier : MonoBehaviour
     private float lastIso = -1f;
     private float lastShutterSpeed = -1f;
     private float lastAperture = -1f;
+    private float lastFocalLength = -1f;
     private bool warnedMissingSettings;
 
     private void Reset()
@@ -36,7 +37,8 @@ public class CAMPhysicalCameraApplier : MonoBehaviour
 
         if (!Mathf.Approximately(settings.Iso, lastIso)
             || !Mathf.Approximately(settings.ShutterSpeed, lastShutterSpeed)
-            || !Mathf.Approximately(settings.Aperture, lastAperture))
+            || !Mathf.Approximately(settings.Aperture, lastAperture)
+            || !Mathf.Approximately(settings.FocalLength, lastFocalLength))
         {
             ApplyPhysicalCameraSettings();
         }
@@ -61,10 +63,12 @@ public class CAMPhysicalCameraApplier : MonoBehaviour
         targetCamera.iso = Mathf.RoundToInt(settings.Iso);
         targetCamera.shutterSpeed = settings.ShutterSpeed;
         targetCamera.aperture = settings.Aperture;
+        targetCamera.focalLength = settings.FocalLength;
 
         lastIso = settings.Iso;
         lastShutterSpeed = settings.ShutterSpeed;
         lastAperture = settings.Aperture;
+        lastFocalLength = settings.FocalLength;
     }
 
     private void EnsureReferences()

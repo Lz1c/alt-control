@@ -10,6 +10,12 @@ public class CAMCOLCameraSettingsEditor : Editor
     private SerializedProperty shutterSpeedLimits;
     private SerializedProperty aperture;
     private SerializedProperty apertureLimits;
+    private SerializedProperty focalLength;
+    private SerializedProperty focalLengthLimits;
+    private SerializedProperty focusDistance;
+    private SerializedProperty focusDistanceLimits;
+    private SerializedProperty focusClearRange;
+    private SerializedProperty focusClearRangeLimits;
     private SerializedProperty exposureCompensation;
     private SerializedProperty exposureCompensationLimits;
 
@@ -21,6 +27,12 @@ public class CAMCOLCameraSettingsEditor : Editor
         shutterSpeedLimits = serializedObject.FindProperty("shutterSpeedLimits");
         aperture = serializedObject.FindProperty("aperture");
         apertureLimits = serializedObject.FindProperty("apertureLimits");
+        focalLength = serializedObject.FindProperty("focalLength");
+        focalLengthLimits = serializedObject.FindProperty("focalLengthLimits");
+        focusDistance = serializedObject.FindProperty("focusDistance");
+        focusDistanceLimits = serializedObject.FindProperty("focusDistanceLimits");
+        focusClearRange = serializedObject.FindProperty("focusClearRange");
+        focusClearRangeLimits = serializedObject.FindProperty("focusClearRangeLimits");
         exposureCompensation = serializedObject.FindProperty("exposureCompensation");
         exposureCompensationLimits = serializedObject.FindProperty("exposureCompensationLimits");
     }
@@ -35,6 +47,12 @@ public class CAMCOLCameraSettingsEditor : Editor
         EditorGUILayout.Space(6f);
         DrawAperture();
         EditorGUILayout.Space(6f);
+        DrawFocalLength();
+        EditorGUILayout.Space(6f);
+        DrawFocusDistance();
+        EditorGUILayout.Space(6f);
+        DrawFocusClearRange();
+        EditorGUILayout.Space(6f);
         DrawExposureCompensation();
 
         serializedObject.ApplyModifiedProperties();
@@ -42,9 +60,9 @@ public class CAMCOLCameraSettingsEditor : Editor
 
     private void DrawIso()
     {
-        DrawLimits("ISO Limits", isoLimits, 1f);
+        DrawLimits("ISO Limits", isoLimits, 50f);
 
-        float min = Mathf.Max(1f, isoLimits.vector2Value.x);
+        float min = Mathf.Max(50f, isoLimits.vector2Value.x);
         float max = Mathf.Max(min, isoLimits.vector2Value.y);
         int value = Mathf.RoundToInt(Mathf.Clamp(iso.floatValue, min, max));
         iso.floatValue = EditorGUILayout.IntSlider("ISO", value, Mathf.RoundToInt(min), Mathf.RoundToInt(max));
@@ -74,6 +92,38 @@ public class CAMCOLCameraSettingsEditor : Editor
         float max = Mathf.Max(min, apertureLimits.vector2Value.y);
         aperture.floatValue = EditorGUILayout.Slider("Aperture", Mathf.Clamp(aperture.floatValue, min, max), min, max);
         EditorGUILayout.LabelField("Display", $"f/{aperture.floatValue:0.#}");
+    }
+
+    private void DrawFocalLength()
+    {
+        DrawLimits("Focal Length Limits", focalLengthLimits, 1f);
+
+        float min = Mathf.Max(1f, focalLengthLimits.vector2Value.x);
+        float max = Mathf.Max(min, focalLengthLimits.vector2Value.y);
+        focalLength.floatValue = EditorGUILayout.Slider("Focal Length", Mathf.Clamp(focalLength.floatValue, min, max), min, max);
+        EditorGUILayout.LabelField("Display", $"{focalLength.floatValue:0.#} mm");
+    }
+
+    private void DrawFocusDistance()
+    {
+        DrawLimits("Focus Distance Limits", focusDistanceLimits, 0.1f);
+
+        float min = Mathf.Max(0.1f, focusDistanceLimits.vector2Value.x);
+        float max = Mathf.Max(min, focusDistanceLimits.vector2Value.y);
+        focusDistance.floatValue = EditorGUILayout.Slider("Focus Distance", Mathf.Clamp(focusDistance.floatValue, min, max), min, max);
+        EditorGUILayout.LabelField("Display", $"{focusDistance.floatValue:0.##} m");
+    }
+
+    private void DrawFocusClearRange()
+    {
+        DrawLimits("Focus Clear Range Limits", focusClearRangeLimits, 0.1f);
+
+        float min = Mathf.Max(0.1f, focusClearRangeLimits.vector2Value.x);
+        float max = Mathf.Max(min, focusClearRangeLimits.vector2Value.y);
+        focusClearRange.floatValue = EditorGUILayout.Slider("Focus Clear Range", Mathf.Clamp(focusClearRange.floatValue, min, max), min, max);
+        float near = Mathf.Max(0.1f, focusDistance.floatValue - focusClearRange.floatValue * 0.5f);
+        float far = focusDistance.floatValue + focusClearRange.floatValue * 0.5f;
+        EditorGUILayout.LabelField("Clear Zone", $"{near:0.##} m - {far:0.##} m");
     }
 
     private void DrawExposureCompensation()
