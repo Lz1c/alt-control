@@ -58890,10 +58890,6 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1106688662}
-    - targetCorrespondingSourceObject: {fileID: 5561527052464464603, guid: 172f9386e5ef58a49a21a05b76f23f37,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1106688664}
   m_SourcePrefab: {fileID: 100100000, guid: 172f9386e5ef58a49a21a05b76f23f37, type: 3}
 --- !u!1 &1106688652 stripped
 GameObject:
@@ -58914,7 +58910,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_RenderShadows: 1
-  m_RequiresDepthTextureOption: 2
+  m_RequiresDepthTextureOption: 1
   m_RequiresOpaqueTextureOption: 2
   m_CameraType: 0
   m_Cameras: []
@@ -59048,8 +59044,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetCamera: {fileID: 1106688657}
   focusButton: {fileID: 0}
+  settings: {fileID: 0}
   focusKey: 102
   maxFocusDistance: 500
+  focusTransitionDuration: 0.35
   focusLayers:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -59067,28 +59065,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetCamera: {fileID: 1106688657}
   meteringButton: {fileID: 0}
+  focusController: {fileID: 1106688662}
   targetMiddleGray: 0.18
   meteringKey: 109
+  focusOnMetering: 1
   renderSampleSize: 256
-  focusController: {fileID: 1106688662}
   zoneColumns: 8
   zoneRows: 5
   centerWeight: 1.35
   contrastWeight: 0.8
   focusZoneBoost: 2.2
   highlightProtection: 0.35
---- !u!114 &1106688664
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1106688652}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 55958c89b602bfa41b7ae144a0db0e36, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &1107950678
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -77136,6 +77123,9 @@ MonoBehaviour:
   isoText: {fileID: 1268365787}
   shutterSpeedText: {fileID: 1682864894}
   apertureText: {fileID: 200059480}
+  focalLengthText: {fileID: 0}
+  focusDistanceText: {fileID: 0}
+  focusClearRangeText: {fileID: 0}
   exposureCompensationText: {fileID: 2140702025}
   evScalePointer: {fileID: 0}
   evScalePixelsPerStop: 20
@@ -79945,6 +79935,12 @@ MonoBehaviour:
   shutterSpeedLimits: {x: 0.001, y: 0.06666667}
   aperture: 5.6
   apertureLimits: {x: 1, y: 32}
+  focalLength: 50
+  focalLengthLimits: {x: 1, y: 300}
+  focusDistance: 10
+  focusDistanceLimits: {x: 0.1, y: 10000}
+  focusClearRange: 2
+  focusClearRangeLimits: {x: 0.1, y: 100}
   exposureCompensation: 0
   exposureCompensationLimits: {x: -3, y: 3}
 --- !u!114 &1459574445
