@@ -10574,7 +10574,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: f/5.6
+  m_text: F32
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -57615,7 +57615,6 @@ MonoBehaviour:
   meteringKey: 109
   focusOnMetering: 1
   renderSampleSize: 256
-  focusController: {fileID: 1106688662}
   zoneColumns: 8
   zoneRows: 5
   centerWeight: 1.35
@@ -67010,7 +67009,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 100
+  m_text: ISO 100
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -75245,6 +75244,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   settings: {fileID: 1459574444}
+  referenceCamera: {fileID: 0}
   isoText: {fileID: 1268365787}
   shutterSpeedText: {fileID: 1682864894}
   apertureText: {fileID: 200059480}
@@ -75252,6 +75252,26 @@ MonoBehaviour:
   focusDistanceText: {fileID: 0}
   focusClearRangeText: {fileID: 0}
   exposureCompensationText: {fileID: 2140702025}
+  evScalePointer: {fileID: 0}
+  evScalePixelsPerStop: 20
+  evScaleRangeStops: 3
+  focalScalePointer: {fileID: 0}
+  focalScaleValueText: {fileID: 0}
+  focalDisplayRange: {x: 16, y: 300}
+  focalScaleTravel: 160
+  focusScalePointer: {fileID: 0}
+  focusClearBracket: {fileID: 0}
+  focusScaleValueText: {fileID: 0}
+  focusDisplayRange: {x: 0.5, y: 1000}
+  focusScaleTravel: 160
+  minBracketPixels: 6
+  shotsRemainingText: {fileID: 0}
+  aspectRatioText: {fileID: 0}
+  fileFormatText: {fileID: 0}
+  batteryText: {fileID: 0}
+  shotsRemaining: 1999
+  fileFormat: RAW
+  batteryPercent: 36
 --- !u!1001 &1415228131
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -77868,7 +77888,7 @@ MonoBehaviour:
   isoLimits: {x: 100, y: 6400}
   shutterSpeed: 0.008000001
   shutterSpeedLimits: {x: 0.001, y: 6}
-  aperture: 5.6
+  aperture: 32
   apertureLimits: {x: 1, y: 32}
   focalLength: 24
   focalLengthLimits: {x: 24, y: 70}
@@ -89691,7 +89711,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 1/125s
+  m_text: 1/125
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -111558,7 +111578,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 0 EV
+  m_text: "\xB10.0"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
