@@ -40,10 +40,134 @@ public static class CameraHudTools
         SaveTexture(BuildEvPointer(), "ev_pointer.png");
         SaveTexture(BuildAFBracket(), "af_bracket.png");
         SaveTexture(BuildVignette(), "vignette.png");
+        SaveTexture(BuildFocalScale(), "focal_scale.png");
+        SaveTexture(BuildFocalPointer(), "focal_pointer.png");
+        SaveTexture(BuildFocusScale(), "focus_scale.png");
+        SaveTexture(BuildFocusPointer(), "focus_pointer.png");
+        SaveTexture(BuildFocusBracket(), "focus_bracket.png");
 
         AssetDatabase.Refresh();
         ApplyIconImportSettings();
-        Debug.Log("[CameraHudTools] Generated 6 HUD icons -> " + IconDir);
+
+        // The in-focus bracket must stretch VERTICALLY (vertical focus scale), so re-import it
+        // 9-sliced with a top/bottom border. ApplyIconImportSettings above forces Single mode
+        // with no border, so this targeted fix-up must run AFTER it.
+        if (AssetImporter.GetAtPath(IconDir + "/focus_bracket.png") is TextureImporter bracketImporter)
+        {
+            bracketImporter.spriteBorder = new Vector4(0f, 6f, 0f, 6f); // L, B, R, T
+            bracketImporter.SaveAndReimport();
+        }
+
+        Debug.Log("[CameraHudTools] Generated 11 HUD icons -> " + IconDir);
+    }
+
+    // ---------------------------------------------------------------- Lens scale sprites
+
+    // Vertical focal-length zoom bar (W bottom → T top), 12×160. Right baseline column +
+    // major ticks (7px) at log positions of common focal lengths, minor ticks (4px) between.
+    // Tick positions use the SAME log map as the runtime pointer (focal range 16–300 mm).
+    private static Texture2D BuildFocalScale()
+    {
+        const int W = 12, H = 160;
+        const float Min = 16f, Max = 300f;
+        Texture2D tex = NewTransparent(W, H);
+        FillRect(tex, W - 1, 0, 1, H, Color.white); // right baseline
+
+        float[] majors = { 16f, 24f, 35f, 50f, 70f, 105f, 150f, 200f, 300f };
+        foreach (float mm in majors)
+        {
+            FillRect(tex, W - 8, TickPos(mm, Min, Max, H), 7, 1, Color.white);
+        }
+
+        float[] minors = { 20f, 28f, 40f, 60f, 85f, 135f, 250f };
+        foreach (float mm in minors)
+        {
+            FillRect(tex, W - 5, TickPos(mm, Min, Max, H), 4, 1, Color.white);
+        }
+
+        tex.Apply();
+        return tex;
+    }
+
+    // Vertical focus-distance ruler (near 0.5 bottom → ∞ top), 12×160. LEFT baseline + horizontal
+    // ticks (mirror of the focal bar). Log map 0.5–1000 m, same as the runtime pointer.
+    private static Texture2D BuildFocusScale()
+    {
+        const int W = 12, H = 160;
+        const float Min = 0.5f, Max = 1000f;
+        Texture2D tex = NewTransparent(W, H);
+        FillRect(tex, 0, 0, 1, H, Color.white); // left baseline
+
+        float[] majors = { 0.5f, 1f, 2f, 5f, 10f, 50f, 1000f };
+        foreach (float m in majors)
+        {
+            FillRect(tex, 1, TickPos(m, Min, Max, H), 7, 1, Color.white);
+        }
+
+        float[] minors = { 0.7f, 1.5f, 3f, 7f, 20f, 100f, 300f };
+        foreach (float m in minors)
+        {
+            FillRect(tex, 1, TickPos(m, Min, Max, H), 4, 1, Color.white);
+        }
+
+        tex.Apply();
+        return tex;
+    }
+
+    private static int TickPos(float value, float min, float max, int span)
+    {
+        return Mathf.Clamp(Mathf.RoundToInt(CAMCOLCameraSettingsTMPDisplay.NormalizeLog(value, min, max) * (span - 1)), 0, span - 1);
+    }
+
+    // 6×10 right-pointing triangle ▶ that sits to the LEFT of the focal bar and slides in Y.
+    private static Texture2D BuildFocalPointer()
+    {
+        const int W = 6, H = 10;
+        Texture2D tex = NewTransparent(W, H);
+        FillRect(tex, 0, 0, 1, 10, Color.white);
+        FillRect(tex, 1, 1, 1, 8, Color.white);
+        FillRect(tex, 2, 2, 1, 6, Color.white);
+        FillRect(tex, 3, 3, 1, 4, Color.white);
+        FillRect(tex, 4, 4, 1, 2, Color.white); // apex points right, into the bar
+        tex.Apply();
+        return tex;
+    }
+
+    // 6×10 left-pointing triangle ◀ that sits to the RIGHT of the focus bar and slides in Y.
+    private static Texture2D BuildFocusPointer()
+    {
+        const int W = 6, H = 10;
+        Texture2D tex = NewTransparent(W, H);
+        FillRect(tex, 5, 0, 1, 10, Color.white);
+        FillRect(tex, 4, 1, 1, 8, Color.white);
+        FillRect(tex, 3, 2, 1, 6, Color.white);
+        FillRect(tex, 2, 3, 1, 4, Color.white);
+        FillRect(tex, 1, 4, 1, 2, Color.white); // apex points left, into the bar
+        tex.Apply();
+        return tex;
+    }
+
+    // Stretchable VERTICAL in-focus bracket, 12×16. Top + bottom caps with small inward feet +
+    // a thin vertical connector. Imported with a 6px top/bottom border (see GenerateIcons) so the
+    // middle stretches in height and the caps stay crisp.
+    private static Texture2D BuildFocusBracket()
+    {
+        const int W = 12, H = 16;
+        Texture2D tex = NewTransparent(W, H);
+
+        // bottom cap + feet
+        FillRect(tex, 0, 0, W, 2, Color.white);
+        FillRect(tex, 0, 2, 3, 1, Color.white);
+        FillRect(tex, W - 3, 2, 3, 1, Color.white);
+        // top cap + feet
+        FillRect(tex, 0, H - 2, W, 2, Color.white);
+        FillRect(tex, 0, H - 3, 3, 1, Color.white);
+        FillRect(tex, W - 3, H - 3, 3, 1, Color.white);
+        // mid connector (stretches with the sliced middle)
+        FillRect(tex, W / 2, 5, 1, H - 10, Color.white);
+
+        tex.Apply();
+        return tex;
     }
 
     private static Texture2D BuildShotsCard()
@@ -349,6 +473,221 @@ public static class CameraHudTools
         return true;
     }
 
+    // ---------------------------------------------------------------- Lens Scales
+
+    private const string LensRootName = "LensScales";
+    private const string FocalScalePath = IconDir + "/focal_scale.png";
+    private const string FocalPointerPath = IconDir + "/focal_pointer.png";
+    private const string FocusScalePath = IconDir + "/focus_scale.png";
+    private const string FocusPointerPath = IconDir + "/focus_pointer.png";
+    private const string FocusBracketPath = IconDir + "/focus_bracket.png";
+
+    // Focal log range (mm) and Focus log range (m) — pushed into the driver by SetupLensScales so
+    // tick labels and sprite ticks line up with the driven pointer regardless of serialized state.
+    private const float FocalMin = 16f, FocalMax = 300f;
+    private const float FocusMin = 0.5f, FocusMax = 1000f;
+    private const float BarWidth = 12f;     // both vertical bars
+    private const float BarHeight = 160f;   // matches focal/focusScaleTravel
+    private const float LensTravel = 160f;  // matches focal/focusScaleTravel
+
+    // Builds the Sony-style lens indicators: two vertical bars on the right edge, side by side —
+    // focal-length zoom (W↔T) on the outer column and focus distance (near↔∞, with an in-focus
+    // bracket) on the inner column. Idempotent: destroys+recreates the LensScales root, then
+    // re-wires the driver each run.
+    [MenuItem("Tools/Camera HUD/Setup Lens Scales")]
+    public static void SetupLensScales()
+    {
+        GameObject canvas = GameObject.Find("Canvas");
+        if (!canvas)
+        {
+            Debug.LogError("[CameraHudTools] Canvas not found in active scene");
+            return;
+        }
+
+        Sprite focalBar = AssetDatabase.LoadAssetAtPath<Sprite>(FocalScalePath);
+        Sprite focalPointer = AssetDatabase.LoadAssetAtPath<Sprite>(FocalPointerPath);
+        Sprite focusBar = AssetDatabase.LoadAssetAtPath<Sprite>(FocusScalePath);
+        Sprite focusBracket = AssetDatabase.LoadAssetAtPath<Sprite>(FocusBracketPath);
+        Sprite focusPointer = AssetDatabase.LoadAssetAtPath<Sprite>(FocusPointerPath);
+        if (!focalBar || !focalPointer || !focusBar || !focusBracket || !focusPointer)
+        {
+            Debug.LogError("[CameraHudTools] Missing lens-scale sprites — run Tools/Camera HUD/Generate Icons first");
+            return;
+        }
+
+        CAMCOLCameraSettingsTMPDisplay display = canvas.GetComponentInChildren<CAMCOLCameraSettingsTMPDisplay>(true);
+        // Parent the widgets under the Canvas (full 800×450 space), NOT under the driver's
+        // GameObject — the driver lives on the bottom HUD bar, which is only an 800×60 strip
+        // and would squash/clip the vertical bars.
+        Transform host = canvas.transform;
+
+        Transform existing = host.Find(LensRootName);
+        if (!existing)
+        {
+            GameObject stray = GameObject.Find(LensRootName); // catch a root left elsewhere by an older run
+            if (stray)
+            {
+                existing = stray.transform;
+            }
+        }
+        if (existing)
+        {
+            Object.DestroyImmediate(existing.gameObject);
+        }
+
+        GameObject root = NewUIChild(host, LensRootName);
+        StretchFull((RectTransform)root.transform);
+
+        TMP_FontAsset font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontAssetPath);
+
+        Vector2 barSize = new Vector2(BarWidth, BarHeight);
+        Vector2 pointerSize = new Vector2(6f, 10f);
+        float valueY = BarHeight * 0.5f + 18f;
+
+        // ---- Focal zoom bar (outer / rightmost column) ----
+        // Bar centered on the group origin; pointer ▶ on its LEFT; T/W + value labels on its RIGHT.
+        GameObject focal = NewUIChild(root.transform, "FocalScale");
+        SetGroupRect((RectTransform)focal.transform, new Vector2(1f, 0.5f), new Vector2(-46f, 0f), new Vector2(60f, 200f));
+
+        AddImage(focal.transform, "Bar", focalBar, Vector2.zero, barSize, false);
+        GameObject focalPtr = AddImage(focal.transform, "Pointer", focalPointer, new Vector2(-11f, 0f), pointerSize, false);
+        GameObject focalVal = AddLabel(focal.transform, "Value", "50mm", font, new Vector2(0f, valueY), 15f);
+        AddLabel(focal.transform, "LabelT", "T", font, new Vector2(14f, BarHeight * 0.5f - 10f), 12f);
+        AddLabel(focal.transform, "LabelW", "W", font, new Vector2(14f, -BarHeight * 0.5f + 10f), 12f);
+
+        // ---- Focus distance bar (inner column, left of focal) ----
+        // Bar centered; pointer ◀ on its RIGHT; distance tick labels on its LEFT; bracket over the bar.
+        GameObject focus = NewUIChild(root.transform, "FocusScale");
+        SetGroupRect((RectTransform)focus.transform, new Vector2(1f, 0.5f), new Vector2(-120f, 0f), new Vector2(60f, 200f));
+
+        AddImage(focus.transform, "Track", focusBar, Vector2.zero, barSize, false);
+        GameObject bracket = AddImage(focus.transform, "Bracket", focusBracket, Vector2.zero, new Vector2(BarWidth + 4f, 16f), true);
+        GameObject focusPtr = AddImage(focus.transform, "Pointer", focusPointer, new Vector2(11f, 0f), pointerSize, false);
+        GameObject focusVal = AddLabel(focus.transform, "Value", "10m", font, new Vector2(0f, valueY), 15f);
+
+        string[] tickLabels = { "0.5", "1", "2", "5", "10", "∞" };
+        float[] tickValues = { 0.5f, 1f, 2f, 5f, 10f, 1000f };
+        for (int i = 0; i < tickLabels.Length; i++)
+        {
+            float t = CAMCOLCameraSettingsTMPDisplay.NormalizeLog(tickValues[i], FocusMin, FocusMax);
+            float y = (t - 0.5f) * LensTravel;
+            AddLabel(focus.transform, "Tick_" + i, tickLabels[i], font, new Vector2(-15f, y), 11f);
+        }
+
+        // ---- Wire the created widgets into the driver ----
+        // Also push the geometry (travel + log ranges) so the driver's pointer math stays locked
+        // to the sprite the menu just built — never trust a stale serialized travel/range from an
+        // earlier run (changing a field's default does NOT update already-serialized values).
+        if (display)
+        {
+            SerializedObject so = new SerializedObject(display);
+            SetRef(so, "focalScalePointer", focalPtr.GetComponent<RectTransform>());
+            SetRef(so, "focusScalePointer", focusPtr.GetComponent<RectTransform>());
+            SetRef(so, "focusClearBracket", bracket.GetComponent<RectTransform>());
+            SetRef(so, "focalScaleValueText", focalVal.GetComponent<TMP_Text>());
+            SetRef(so, "focusScaleValueText", focusVal.GetComponent<TMP_Text>());
+            SetFloat(so, "focalScaleTravel", LensTravel);
+            SetFloat(so, "focusScaleTravel", LensTravel);
+            SetVec2(so, "focalDisplayRange", new Vector2(FocalMin, FocalMax));
+            SetVec2(so, "focusDisplayRange", new Vector2(FocusMin, FocusMax));
+            so.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(display);
+        }
+        else
+        {
+            Debug.LogWarning("[CameraHudTools] CAMCOLCameraSettingsTMPDisplay not found — lens-scale refs were NOT wired");
+        }
+
+        EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+        Debug.Log($"[CameraHudTools] Lens scales built under {host.name}/{LensRootName}{(display ? " and wired" : " (NOT wired)")}");
+    }
+
+    private static void SetGroupRect(RectTransform rt, Vector2 anchor, Vector2 anchoredPos, Vector2 size)
+    {
+        rt.anchorMin = rt.anchorMax = anchor;
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = size;
+        rt.anchoredPosition = anchoredPos;
+        rt.localScale = Vector3.one;
+    }
+
+    // Child element centered on its parent's origin; the centered (t-0.5)*travel pointer math
+    // depends on bar/pointer sharing this origin, so everything uses anchor=pivot=(0.5,0.5).
+    private static GameObject AddImage(Transform parent, string name, Sprite sprite, Vector2 pos, Vector2 size, bool sliced)
+    {
+        GameObject go = NewUIChild(parent, name);
+        RectTransform rt = (RectTransform)go.transform;
+        rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = size;
+        rt.anchoredPosition = pos;
+        Image img = go.AddComponent<Image>();
+        img.sprite = sprite;
+        img.raycastTarget = false;
+        if (sliced)
+        {
+            img.type = Image.Type.Sliced;
+            img.fillCenter = true;
+        }
+        return go;
+    }
+
+    private static GameObject AddLabel(Transform parent, string name, string text, TMP_FontAsset font, Vector2 pos, float fontSize)
+    {
+        GameObject go = NewUIChild(parent, name);
+        RectTransform rt = (RectTransform)go.transform;
+        rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = new Vector2(56f, 20f);
+        rt.anchoredPosition = pos;
+
+        TextMeshProUGUI tmp = go.AddComponent<TextMeshProUGUI>();
+        tmp.text = text;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.fontSize = fontSize;
+        tmp.enableAutoSizing = false;
+        tmp.raycastTarget = false;
+        tmp.color = Color.white;
+        if (font)
+        {
+            tmp.font = font;
+            if (font.material)
+            {
+                tmp.fontSharedMaterial = font.material;
+            }
+        }
+        return go;
+    }
+
+    private static void SetRef(SerializedObject so, string propertyName, Object value)
+    {
+        SerializedProperty p = so.FindProperty(propertyName);
+        if (p != null)
+        {
+            p.objectReferenceValue = value;
+        }
+        else
+        {
+            Debug.LogWarning("[CameraHudTools] Driver field not found, not wired: " + propertyName);
+        }
+    }
+
+    private static void SetFloat(SerializedObject so, string propertyName, float value)
+    {
+        SerializedProperty p = so.FindProperty(propertyName);
+        if (p != null)
+        {
+            p.floatValue = value;
+        }
+    }
+
+    private static void SetVec2(SerializedObject so, string propertyName, Vector2 value)
+    {
+        SerializedProperty p = so.FindProperty(propertyName);
+        if (p != null)
+        {
+            p.vector2Value = value;
+        }
+    }
+
     // ---------------------------------------------------------------- Outline
 
     [MenuItem("Tools/Camera HUD/Apply TMP Outline")]
@@ -485,7 +824,7 @@ public static class CameraHudTools
 
     private static System.Collections.Generic.IEnumerable<TMP_Text> EnumerateHudTextMeshes()
     {
-        foreach (string rootName in new[] { "CameraHUD", "CameraHUDTop" })
+        foreach (string rootName in new[] { "CameraHUD", "CameraHUDTop", "LensScales" })
         {
             GameObject root = GameObject.Find(rootName);
             if (!root) continue;

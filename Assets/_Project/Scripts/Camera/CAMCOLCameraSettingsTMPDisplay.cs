@@ -52,6 +52,29 @@ public class CAMCOLCameraSettingsTMPDisplay : MonoBehaviour
     [SerializeField] private float evScalePixelsPerStop = 20f;
     [SerializeField] private float evScaleRangeStops = 3f;
 
+    [Header("Lens Scales (Focal / Focus)")]
+    [Tooltip("Vertical zoom-bar pointer. Y is driven by focal length (mm), W bottom → T top. Built by Tools/Camera HUD/Setup Lens Scales.")]
+    [SerializeField] private RectTransform focalScalePointer;
+    [Tooltip("Optional TMP that shows the current focal length (e.g. \"50mm\").")]
+    [SerializeField] private TMP_Text focalScaleValueText;
+    [Tooltip("Focal length display range in mm (log-mapped). Independent of the CAMCOLCameraSettings clamp limits; keep in sync with the baked sprite ticks.")]
+    [SerializeField] private Vector2 focalDisplayRange = new Vector2(16f, 300f);
+    [Tooltip("Total vertical pixel travel of the focal pointer along the bar.")]
+    [SerializeField] private float focalScaleTravel = 160f;
+
+    [Tooltip("Vertical distance-scale pointer. Y is driven by focus distance (m), near bottom → ∞ top.")]
+    [SerializeField] private RectTransform focusScalePointer;
+    [Tooltip("Stretchable in-focus bracket. Y + height are driven by focus distance and focus clear range.")]
+    [SerializeField] private RectTransform focusClearBracket;
+    [Tooltip("Optional TMP that shows the current focus distance (e.g. \"2.4m\").")]
+    [SerializeField] private TMP_Text focusScaleValueText;
+    [Tooltip("Focus distance display range in metres (log-mapped). Values above max park at the ∞ tick.")]
+    [SerializeField] private Vector2 focusDisplayRange = new Vector2(0.5f, 1000f);
+    [Tooltip("Total vertical pixel travel of the focus pointer along the scale.")]
+    [SerializeField] private float focusScaleTravel = 160f;
+    [Tooltip("Minimum on-screen width of the in-focus bracket, in pixels.")]
+    [SerializeField] private float minBracketPixels = 6f;
+
     [Header("Status Text Outputs (top HUD)")]
     [SerializeField] private TMP_Text shotsRemainingText;
     [SerializeField] private TMP_Text aspectRatioText;
@@ -129,8 +152,42 @@ public class CAMCOLCameraSettingsTMPDisplay : MonoBehaviour
 
     private void OnValidate()
     {
+        focalDisplayRange = SortRange(focalDisplayRange, 1f);
+        focusDisplayRange = SortRange(focusDisplayRange, 0.1f);
+        focalScaleTravel = Mathf.Max(1f, focalScaleTravel);
+        focusScaleTravel = Mathf.Max(1f, focusScaleTravel);
+        minBracketPixels = Mathf.Max(0f, minBracketPixels);
         EnsureReferences();
+#if UNITY_EDITOR
+        // Driving a RectTransform sizeDelta (the focus bracket) directly inside OnValidate trips
+        // "SendMessage cannot be called during OnValidate". Defer one editor tick.
+        if (!Application.isPlaying)
+        {
+            UnityEditor.EditorApplication.delayCall -= DeferredEditorRefresh;
+            UnityEditor.EditorApplication.delayCall += DeferredEditorRefresh;
+            return;
+        }
+#endif
         Refresh(true);
+    }
+
+#if UNITY_EDITOR
+    private void DeferredEditorRefresh()
+    {
+        UnityEditor.EditorApplication.delayCall -= DeferredEditorRefresh;
+        if (this == null)
+        {
+            return;
+        }
+        Refresh(true);
+    }
+#endif
+
+    private static Vector2 SortRange(Vector2 range, float floor)
+    {
+        float min = Mathf.Max(floor, Mathf.Min(range.x, range.y));
+        float max = Mathf.Max(min + 1e-3f, Mathf.Max(range.x, range.y));
+        return new Vector2(min, max);
     }
 
     public void Refresh()
@@ -155,6 +212,8 @@ public class CAMCOLCameraSettingsTMPDisplay : MonoBehaviour
             SetText(focusDistanceText, string.Empty);
             SetText(focusClearRangeText, string.Empty);
             SetText(exposureCompensationText, string.Empty);
+            SetText(focalScaleValueText, string.Empty);
+            SetText(focusScaleValueText, string.Empty);
 
             lastIso = float.NaN;
             lastShutterSpeed = float.NaN;
@@ -194,6 +253,8 @@ public class CAMCOLCameraSettingsTMPDisplay : MonoBehaviour
         SetText(focusClearRangeText, FormatFocusClearRange(lastFocusClearRange));
         SetText(exposureCompensationText, FormatExposureCompensation(lastExposureCompensation));
         UpdateEvScalePointer(lastExposureCompensation);
+        UpdateFocalScalePointer(lastFocalLength);
+        UpdateFocusScale(lastFocusDistance, lastFocusClearRange);
     }
 
     private void UpdateEvScalePointer(float ev)
@@ -203,6 +264,69 @@ public class CAMCOLCameraSettingsTMPDisplay : MonoBehaviour
         Vector2 pos = evScalePointer.anchoredPosition;
         pos.x = clamped * evScalePixelsPerStop;
         evScalePointer.anchoredPosition = pos;
+    }
+
+    /// <summary>
+    /// Maps a value to 0..1 on a logarithmic scale between min and max.
+    /// Shared by the runtime pointer placement (below) and the editor tick/label placement
+    /// in CameraHudTools.SetupLensScales, so the bar art and the pointer never drift.
+    /// </summary>
+    public static float NormalizeLog(float value, float min, float max)
+    {
+        value = Mathf.Max(value, 1e-4f);
+        min = Mathf.Max(min, 1e-4f);
+        max = Mathf.Max(max, min + 1e-4f);
+        float t = (Mathf.Log(value) - Mathf.Log(min)) / (Mathf.Log(max) - Mathf.Log(min));
+        return Mathf.Clamp01(t);
+    }
+
+    // Vertical zoom bar: focal length (mm) → pointer Y (W bottom, T top). Centered convention
+    // (t-0.5)*travel keeps the pointer aligned with a bar centered on the pointer's parent origin.
+    private void UpdateFocalScalePointer(float focalLengthMm)
+    {
+        if (focalScalePointer)
+        {
+            float t = NormalizeLog(focalLengthMm, focalDisplayRange.x, focalDisplayRange.y);
+            Vector2 pos = focalScalePointer.anchoredPosition;
+            pos.y = (t - 0.5f) * focalScaleTravel;
+            focalScalePointer.anchoredPosition = pos;
+        }
+
+        SetText(focalScaleValueText, FormatFocalLength(focalLengthMm));
+    }
+
+    // Vertical distance scale: focus distance (m) → pointer Y (near bottom → ∞ top), plus an
+    // in-focus bracket sized from the clear range (slightly asymmetric: ~1/3 in front, ~2/3
+    // behind, like real DoF).
+    private void UpdateFocusScale(float focusDistanceM, float focusClearRangeM)
+    {
+        if (focusScalePointer)
+        {
+            float t = NormalizeLog(focusDistanceM, focusDisplayRange.x, focusDisplayRange.y);
+            Vector2 pos = focusScalePointer.anchoredPosition;
+            pos.y = (t - 0.5f) * focusScaleTravel;
+            focusScalePointer.anchoredPosition = pos;
+        }
+
+        if (focusClearBracket)
+        {
+            float clear = Mathf.Max(0f, focusClearRangeM);
+            float near = focusDistanceM - clear * 0.33f;
+            float far = focusDistanceM + clear * 0.67f;
+            float tNear = NormalizeLog(near, focusDisplayRange.x, focusDisplayRange.y);
+            float tFar = NormalizeLog(far, focusDisplayRange.x, focusDisplayRange.y);
+            float centerT = (tNear + tFar) * 0.5f;
+
+            Vector2 pos = focusClearBracket.anchoredPosition;
+            pos.y = (centerT - 0.5f) * focusScaleTravel;
+            focusClearBracket.anchoredPosition = pos;
+
+            Vector2 size = focusClearBracket.sizeDelta;
+            size.y = Mathf.Max(minBracketPixels, (tFar - tNear) * focusScaleTravel);
+            focusClearBracket.sizeDelta = size;
+        }
+
+        SetText(focusScaleValueText, FormatFocusDistance(focusDistanceM));
     }
 
     private void RefreshStatus(bool force)
