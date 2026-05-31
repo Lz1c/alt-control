@@ -326,7 +326,7 @@ public class CAMCOLCameraSettingsTMPDisplay : MonoBehaviour
         }
 
         SetText(focalScaleValueText, FormatFocalLength(focalLengthMm));
-        UpdateLensTickLabels(focalScalePointer, ref focalTickLabels, range, focalScaleTravel, FormatFocalTickLabel);
+        UpdateLensTickLabels(focalScalePointer, focalScaleValueText, ref focalTickLabels, range, focalScaleTravel, 24f, FormatFocalTickLabel);
     }
 
     // Vertical distance scale: focus distance (m) → pointer Y (near bottom → ∞ top), plus an
@@ -361,17 +361,17 @@ public class CAMCOLCameraSettingsTMPDisplay : MonoBehaviour
         }
 
         SetText(focusScaleValueText, FormatFocusDistance(focusDistanceM));
-        UpdateLensTickLabels(focusScalePointer, ref focusTickLabels, range, focusScaleTravel, FormatFocusTickLabel);
+        UpdateLensTickLabels(focusScalePointer, focusScaleValueText, ref focusTickLabels, range, focusScaleTravel, -15f, FormatFocusTickLabel);
     }
 
-    private static void UpdateLensTickLabels(RectTransform pointer, ref TMP_Text[] labels, Vector2 range, float travel, System.Func<float, string> formatter)
+    private static void UpdateLensTickLabels(RectTransform pointer, TMP_Text template, ref TMP_Text[] labels, Vector2 range, float travel, float xPosition, System.Func<float, string> formatter)
     {
         if (!pointer)
         {
             return;
         }
 
-        EnsureLensTickLabels(pointer.parent, ref labels);
+        EnsureLensTickLabels(pointer.parent, template, ref labels, xPosition);
         if (labels == null || labels.Length == 0)
         {
             return;
@@ -405,37 +405,63 @@ public class CAMCOLCameraSettingsTMPDisplay : MonoBehaviour
         }
     }
 
-    private static void EnsureLensTickLabels(Transform parent, ref TMP_Text[] labels)
+    private static void EnsureLensTickLabels(Transform parent, TMP_Text template, ref TMP_Text[] labels, float xPosition)
     {
-        if (!parent || HasAnyLabel(labels))
+        if (!parent)
         {
             return;
         }
 
-        labels = new TMP_Text[LensTickCount];
-        for (int i = 0; i < labels.Length; i++)
+        if (labels == null || labels.Length != LensTickCount)
         {
-            Transform tick = parent.Find("Tick_" + i);
-            labels[i] = tick ? tick.GetComponent<TMP_Text>() : null;
-        }
-    }
-
-    private static bool HasAnyLabel(TMP_Text[] labels)
-    {
-        if (labels == null)
-        {
-            return false;
+            labels = new TMP_Text[LensTickCount];
         }
 
         for (int i = 0; i < labels.Length; i++)
         {
             if (labels[i])
             {
-                return true;
+                continue;
             }
+
+            Transform tick = parent.Find("Tick_" + i);
+            labels[i] = tick ? tick.GetComponent<TMP_Text>() : CreateLensTickLabel(parent, template, i, xPosition);
+        }
+    }
+
+    private static TMP_Text CreateLensTickLabel(Transform parent, TMP_Text template, int index, float xPosition)
+    {
+        GameObject tick = new GameObject("Tick_" + index, typeof(RectTransform));
+        tick.layer = parent.gameObject.layer;
+        tick.transform.SetParent(parent, false);
+
+        RectTransform rt = tick.GetComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = new Vector2(56f, 20f);
+        rt.anchoredPosition = new Vector2(xPosition, 0f);
+
+        TextMeshProUGUI label = tick.AddComponent<TextMeshProUGUI>();
+        label.text = string.Empty;
+        label.alignment = TextAlignmentOptions.Center;
+        label.raycastTarget = false;
+
+        if (template)
+        {
+            label.font = template.font;
+            label.fontSharedMaterial = template.fontSharedMaterial;
+            label.fontSize = Mathf.Max(1f, template.fontSize * 0.75f);
+            label.color = template.color;
+            label.enableWordWrapping = false;
+        }
+        else
+        {
+            label.fontSize = 11f;
+            label.color = Color.white;
+            label.enableWordWrapping = false;
         }
 
-        return false;
+        return label;
     }
 
     private void RefreshStatus(bool force)
