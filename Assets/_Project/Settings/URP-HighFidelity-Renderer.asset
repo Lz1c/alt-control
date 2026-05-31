@@ -54,7 +54,8 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: -1878332245247344467}
   - {fileID: -6124509913371200042}
-  m_RendererFeatureMap: adc0de57c6d2eee5
+  - {fileID: -2401278517541482506}
+  m_RendererFeatureMap: adc0de57c6d2eee5d6b526ceae5e01abf6cf292be9f1acde
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -122,3 +123,17 @@ MonoBehaviour:
     cameraTypes: 5
     material: {fileID: 2100000, guid: d65a4f93f956499ab853faaf7e191ccc, type: 2}
     skipTransparents: 0
+--- !u!114 &-2401278517541482506
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1cca7768aaaea4b0081f14e7f9d4b5ad, type: 3}
+  m_Name: FlatKitOutline
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings: {fileID: 11400000, guid: 5b0f92d5a3af4c4fb895681d82012e5d, type: 2}
