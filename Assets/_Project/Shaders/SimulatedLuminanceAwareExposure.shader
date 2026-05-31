@@ -9,6 +9,8 @@ Shader "Hidden/Simulated Camera/Luminance Aware Exposure"
     float _SimulatedLuminanceExposureSoftness;
     float _SimulatedFocusDistance;
     float _SimulatedFocusClearRange;
+    float _SimulatedFocusNearDistance;
+    float _SimulatedFocusFarDistance;
     float _SimulatedFocusBlurStrength;
     float _SimulatedFocusBlurRadius;
     float _SimulatedFocusBokehHighlightBoost;
@@ -78,9 +80,15 @@ Shader "Hidden/Simulated Camera/Luminance Aware Exposure"
         float2 uv = SCREEN_COORDS;
         float rawDepth = SAMPLE_DEPTH(uv);
         float eyeDepth = LINEAR_EYE_DEPTH(rawDepth);
-        float halfClearRange = max(0.05, _SimulatedFocusClearRange * 0.5);
-        float focusDelta = max(0.0, abs(eyeDepth - _SimulatedFocusDistance) - halfClearRange);
-        float rawBlur = smoothstep(0.0, halfClearRange, focusDelta) * _SimulatedFocusBlurStrength;
+        float nearDistance = min(_SimulatedFocusNearDistance, _SimulatedFocusFarDistance);
+        float farDistance = max(_SimulatedFocusNearDistance, _SimulatedFocusFarDistance);
+        float foregroundFalloff = max(0.05, _SimulatedFocusDistance - nearDistance);
+        float backgroundFalloff = max(0.05, farDistance - _SimulatedFocusDistance);
+        float foregroundDelta = max(0.0, nearDistance - eyeDepth);
+        float backgroundDelta = max(0.0, eyeDepth - farDistance);
+        float foregroundBlur = smoothstep(0.0, foregroundFalloff, foregroundDelta) * 1.35;
+        float backgroundBlur = smoothstep(0.0, backgroundFalloff, backgroundDelta);
+        float rawBlur = max(foregroundBlur, backgroundBlur) * _SimulatedFocusBlurStrength;
         float blurWeight = saturate(rawBlur);
         float blurRadius = min(rawBlur, 4.0);
 

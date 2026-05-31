@@ -32,6 +32,8 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class CAMCOLCameraSettingsTMPDisplay : MonoBehaviour
 {
+    private const int LensTickCount = 6;
+
     [Header("References")]
     [SerializeField] private CAMCOLCameraSettings settings;
     [Tooltip("Camera used to resolve the live aspect ratio. Falls back to Camera.main if unset.")]
@@ -90,9 +92,18 @@ public class CAMCOLCameraSettingsTMPDisplay : MonoBehaviour
     private float lastShutterSpeed = float.NaN;
     private float lastAperture = float.NaN;
     private float lastFocalLength = float.NaN;
+    private float lastFocalLengthMin = float.NaN;
+    private float lastFocalLengthMax = float.NaN;
     private float lastFocusDistance = float.NaN;
+    private float lastFocusDistanceMin = float.NaN;
+    private float lastFocusDistanceMax = float.NaN;
     private float lastFocusClearRange = float.NaN;
+    private float lastEffectiveFocusNearDistance = float.NaN;
+    private float lastEffectiveFocusFarDistance = float.NaN;
     private float lastExposureCompensation = float.NaN;
+
+    private TMP_Text[] focalTickLabels;
+    private TMP_Text[] focusTickLabels;
 
     private int lastShotsRemaining = int.MinValue;
     private string lastAspectRatio;
@@ -219,19 +230,33 @@ public class CAMCOLCameraSettingsTMPDisplay : MonoBehaviour
             lastShutterSpeed = float.NaN;
             lastAperture = float.NaN;
             lastFocalLength = float.NaN;
+            lastFocalLengthMin = float.NaN;
+            lastFocalLengthMax = float.NaN;
             lastFocusDistance = float.NaN;
+            lastFocusDistanceMin = float.NaN;
+            lastFocusDistanceMax = float.NaN;
             lastFocusClearRange = float.NaN;
+            lastEffectiveFocusNearDistance = float.NaN;
+            lastEffectiveFocusFarDistance = float.NaN;
             lastExposureCompensation = float.NaN;
             return;
         }
 
+        float effectiveFocusNearDistance = settings.EffectiveFocusNearDistance;
+        float effectiveFocusFarDistance = settings.EffectiveFocusFarDistance;
         if (!force
             && Mathf.Approximately(settings.Iso, lastIso)
             && Mathf.Approximately(settings.ShutterSpeed, lastShutterSpeed)
             && Mathf.Approximately(settings.Aperture, lastAperture)
             && Mathf.Approximately(settings.FocalLength, lastFocalLength)
+            && Mathf.Approximately(settings.FocalLengthMin, lastFocalLengthMin)
+            && Mathf.Approximately(settings.FocalLengthMax, lastFocalLengthMax)
             && Mathf.Approximately(settings.FocusDistance, lastFocusDistance)
+            && Mathf.Approximately(settings.FocusDistanceMin, lastFocusDistanceMin)
+            && Mathf.Approximately(settings.FocusDistanceMax, lastFocusDistanceMax)
             && Mathf.Approximately(settings.FocusClearRange, lastFocusClearRange)
+            && Mathf.Approximately(effectiveFocusNearDistance, lastEffectiveFocusNearDistance)
+            && Mathf.Approximately(effectiveFocusFarDistance, lastEffectiveFocusFarDistance)
             && Mathf.Approximately(settings.ExposureCompensation, lastExposureCompensation))
         {
             return;
@@ -241,20 +266,27 @@ public class CAMCOLCameraSettingsTMPDisplay : MonoBehaviour
         lastShutterSpeed = settings.ShutterSpeed;
         lastAperture = settings.Aperture;
         lastFocalLength = settings.FocalLength;
+        lastFocalLengthMin = settings.FocalLengthMin;
+        lastFocalLengthMax = settings.FocalLengthMax;
         lastFocusDistance = settings.FocusDistance;
+        lastFocusDistanceMin = settings.FocusDistanceMin;
+        lastFocusDistanceMax = settings.FocusDistanceMax;
         lastFocusClearRange = settings.FocusClearRange;
+        lastEffectiveFocusNearDistance = effectiveFocusNearDistance;
+        lastEffectiveFocusFarDistance = effectiveFocusFarDistance;
         lastExposureCompensation = settings.ExposureCompensation;
+        float effectiveFocusClearRange = settings.EffectiveFocusClearRange;
 
         SetText(isoText, FormatIso(lastIso));
         SetText(shutterSpeedText, FormatShutterSpeed(lastShutterSpeed));
         SetText(apertureText, FormatAperture(lastAperture));
         SetText(focalLengthText, FormatFocalLength(lastFocalLength));
         SetText(focusDistanceText, FormatFocusDistance(lastFocusDistance));
-        SetText(focusClearRangeText, FormatFocusClearRange(lastFocusClearRange));
+        SetText(focusClearRangeText, FormatFocusClearRange(effectiveFocusClearRange));
         SetText(exposureCompensationText, FormatExposureCompensation(lastExposureCompensation));
         UpdateEvScalePointer(lastExposureCompensation);
-        UpdateFocalScalePointer(lastFocalLength);
-        UpdateFocusScale(lastFocusDistance, lastFocusClearRange);
+        UpdateFocalScalePointer(lastFocalLength, lastFocalLengthMin, lastFocalLengthMax);
+        UpdateFocusScale(lastFocusDistance, effectiveFocusNearDistance, effectiveFocusFarDistance, lastFocusDistanceMin, lastFocusDistanceMax);
     }
 
     private void UpdateEvScalePointer(float ev)
@@ -282,27 +314,30 @@ public class CAMCOLCameraSettingsTMPDisplay : MonoBehaviour
 
     // Vertical zoom bar: focal length (mm) → pointer Y (W bottom, T top). Centered convention
     // (t-0.5)*travel keeps the pointer aligned with a bar centered on the pointer's parent origin.
-    private void UpdateFocalScalePointer(float focalLengthMm)
+    private void UpdateFocalScalePointer(float focalLengthMm, float minFocalLengthMm, float maxFocalLengthMm)
     {
+        Vector2 range = SortRange(new Vector2(minFocalLengthMm, maxFocalLengthMm), 1f);
         if (focalScalePointer)
         {
-            float t = NormalizeLog(focalLengthMm, focalDisplayRange.x, focalDisplayRange.y);
+            float t = NormalizeLog(focalLengthMm, range.x, range.y);
             Vector2 pos = focalScalePointer.anchoredPosition;
             pos.y = (t - 0.5f) * focalScaleTravel;
             focalScalePointer.anchoredPosition = pos;
         }
 
         SetText(focalScaleValueText, FormatFocalLength(focalLengthMm));
+        UpdateLensTickLabels(focalScalePointer, ref focalTickLabels, range, focalScaleTravel, FormatFocalTickLabel);
     }
 
     // Vertical distance scale: focus distance (m) → pointer Y (near bottom → ∞ top), plus an
     // in-focus bracket sized from the clear range (slightly asymmetric: ~1/3 in front, ~2/3
     // behind, like real DoF).
-    private void UpdateFocusScale(float focusDistanceM, float focusClearRangeM)
+    private void UpdateFocusScale(float focusDistanceM, float nearFocusDistanceM, float farFocusDistanceM, float minFocusDistanceM, float maxFocusDistanceM)
     {
+        Vector2 range = SortRange(new Vector2(minFocusDistanceM, maxFocusDistanceM), 0.1f);
         if (focusScalePointer)
         {
-            float t = NormalizeLog(focusDistanceM, focusDisplayRange.x, focusDisplayRange.y);
+            float t = NormalizeLog(focusDistanceM, range.x, range.y);
             Vector2 pos = focusScalePointer.anchoredPosition;
             pos.y = (t - 0.5f) * focusScaleTravel;
             focusScalePointer.anchoredPosition = pos;
@@ -310,11 +345,10 @@ public class CAMCOLCameraSettingsTMPDisplay : MonoBehaviour
 
         if (focusClearBracket)
         {
-            float clear = Mathf.Max(0f, focusClearRangeM);
-            float near = focusDistanceM - clear * 0.33f;
-            float far = focusDistanceM + clear * 0.67f;
-            float tNear = NormalizeLog(near, focusDisplayRange.x, focusDisplayRange.y);
-            float tFar = NormalizeLog(far, focusDisplayRange.x, focusDisplayRange.y);
+            float near = Mathf.Clamp(nearFocusDistanceM, range.x, range.y);
+            float far = Mathf.Clamp(farFocusDistanceM, near, range.y);
+            float tNear = NormalizeLog(near, range.x, range.y);
+            float tFar = NormalizeLog(far, range.x, range.y);
             float centerT = (tNear + tFar) * 0.5f;
 
             Vector2 pos = focusClearBracket.anchoredPosition;
@@ -327,6 +361,81 @@ public class CAMCOLCameraSettingsTMPDisplay : MonoBehaviour
         }
 
         SetText(focusScaleValueText, FormatFocusDistance(focusDistanceM));
+        UpdateLensTickLabels(focusScalePointer, ref focusTickLabels, range, focusScaleTravel, FormatFocusTickLabel);
+    }
+
+    private static void UpdateLensTickLabels(RectTransform pointer, ref TMP_Text[] labels, Vector2 range, float travel, System.Func<float, string> formatter)
+    {
+        if (!pointer)
+        {
+            return;
+        }
+
+        EnsureLensTickLabels(pointer.parent, ref labels);
+        if (labels == null || labels.Length == 0)
+        {
+            return;
+        }
+
+        for (int i = 0; i < labels.Length; i++)
+        {
+            TMP_Text label = labels[i];
+            if (!label)
+            {
+                continue;
+            }
+
+            float t = labels.Length <= 1 ? 0f : i / (float)(labels.Length - 1);
+            float value = Mathf.Exp(Mathf.Lerp(Mathf.Log(range.x), Mathf.Log(range.y), t));
+            if (i == 0)
+            {
+                value = range.x;
+            }
+            else if (i == labels.Length - 1)
+            {
+                value = range.y;
+            }
+
+            label.text = formatter(value);
+
+            RectTransform rt = label.rectTransform;
+            Vector2 pos = rt.anchoredPosition;
+            pos.y = (NormalizeLog(value, range.x, range.y) - 0.5f) * travel;
+            rt.anchoredPosition = pos;
+        }
+    }
+
+    private static void EnsureLensTickLabels(Transform parent, ref TMP_Text[] labels)
+    {
+        if (!parent || HasAnyLabel(labels))
+        {
+            return;
+        }
+
+        labels = new TMP_Text[LensTickCount];
+        for (int i = 0; i < labels.Length; i++)
+        {
+            Transform tick = parent.Find("Tick_" + i);
+            labels[i] = tick ? tick.GetComponent<TMP_Text>() : null;
+        }
+    }
+
+    private static bool HasAnyLabel(TMP_Text[] labels)
+    {
+        if (labels == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < labels.Length; i++)
+        {
+            if (labels[i])
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void RefreshStatus(bool force)
@@ -462,6 +571,26 @@ public class CAMCOLCameraSettingsTMPDisplay : MonoBehaviour
     private static string FormatFocusClearRange(float value)
     {
         return $"{value:0.##}m";
+    }
+
+    private static string FormatFocalTickLabel(float value)
+    {
+        return value < 10f ? $"{value:0.#}" : $"{Mathf.RoundToInt(value)}";
+    }
+
+    private static string FormatFocusTickLabel(float value)
+    {
+        if (value < 1f)
+        {
+            return $"{value:0.##}";
+        }
+
+        if (value < 10f)
+        {
+            return $"{value:0.#}";
+        }
+
+        return $"{Mathf.RoundToInt(value)}";
     }
 
     private static string FormatExposureCompensation(float value)

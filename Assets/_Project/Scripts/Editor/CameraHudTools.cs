@@ -63,60 +63,26 @@ public static class CameraHudTools
 
     // ---------------------------------------------------------------- Lens scale sprites
 
-    // Vertical focal-length zoom bar (W bottom → T top), 12×160. Right baseline column +
-    // major ticks (7px) at log positions of common focal lengths, minor ticks (4px) between.
-    // Tick positions use the SAME log map as the runtime pointer (focal range 16–300 mm).
+    // Vertical focal-length zoom bar (W bottom → T top), 12×160. The runtime driver owns
+    // movable tick labels so the displayed ticks can follow CAMCOLCameraSettings limits.
     private static Texture2D BuildFocalScale()
     {
         const int W = 12, H = 160;
-        const float Min = 16f, Max = 300f;
         Texture2D tex = NewTransparent(W, H);
         FillRect(tex, W - 1, 0, 1, H, Color.white); // right baseline
-
-        float[] majors = { 16f, 24f, 35f, 50f, 70f, 105f, 150f, 200f, 300f };
-        foreach (float mm in majors)
-        {
-            FillRect(tex, W - 8, TickPos(mm, Min, Max, H), 7, 1, Color.white);
-        }
-
-        float[] minors = { 20f, 28f, 40f, 60f, 85f, 135f, 250f };
-        foreach (float mm in minors)
-        {
-            FillRect(tex, W - 5, TickPos(mm, Min, Max, H), 4, 1, Color.white);
-        }
-
         tex.Apply();
         return tex;
     }
 
-    // Vertical focus-distance ruler (near 0.5 bottom → ∞ top), 12×160. LEFT baseline + horizontal
-    // ticks (mirror of the focal bar). Log map 0.5–1000 m, same as the runtime pointer.
+    // Vertical focus-distance ruler, 12×160. The runtime driver owns movable tick labels so
+    // the displayed ticks can follow CAMCOLCameraSettings limits.
     private static Texture2D BuildFocusScale()
     {
         const int W = 12, H = 160;
-        const float Min = 0.5f, Max = 1000f;
         Texture2D tex = NewTransparent(W, H);
         FillRect(tex, 0, 0, 1, H, Color.white); // left baseline
-
-        float[] majors = { 0.5f, 1f, 2f, 5f, 10f, 50f, 1000f };
-        foreach (float m in majors)
-        {
-            FillRect(tex, 1, TickPos(m, Min, Max, H), 7, 1, Color.white);
-        }
-
-        float[] minors = { 0.7f, 1.5f, 3f, 7f, 20f, 100f, 300f };
-        foreach (float m in minors)
-        {
-            FillRect(tex, 1, TickPos(m, Min, Max, H), 4, 1, Color.white);
-        }
-
         tex.Apply();
         return tex;
-    }
-
-    private static int TickPos(float value, float min, float max, int span)
-    {
-        return Mathf.Clamp(Mathf.RoundToInt(CAMCOLCameraSettingsTMPDisplay.NormalizeLog(value, min, max) * (span - 1)), 0, span - 1);
     }
 
     // 6×10 right-pointing triangle ▶ that sits to the LEFT of the focal bar and slides in Y.
@@ -554,6 +520,11 @@ public static class CameraHudTools
         GameObject focalVal = AddLabel(focal.transform, "Value", "50mm", font, new Vector2(0f, valueY), 15f);
         AddLabel(focal.transform, "LabelT", "T", font, new Vector2(14f, BarHeight * 0.5f - 10f), 12f);
         AddLabel(focal.transform, "LabelW", "W", font, new Vector2(14f, -BarHeight * 0.5f + 10f), 12f);
+        for (int i = 0; i < 6; i++)
+        {
+            float y = (i / 5f - 0.5f) * LensTravel;
+            AddLabel(focal.transform, "Tick_" + i, string.Empty, font, new Vector2(24f, y), 11f);
+        }
 
         // ---- Focus distance bar (inner column, left of focal) ----
         // Bar centered; pointer ◀ on its RIGHT; distance tick labels on its LEFT; bracket over the bar.
@@ -565,13 +536,10 @@ public static class CameraHudTools
         GameObject focusPtr = AddImage(focus.transform, "Pointer", focusPointer, new Vector2(11f, 0f), pointerSize, false);
         GameObject focusVal = AddLabel(focus.transform, "Value", "10m", font, new Vector2(0f, valueY), 15f);
 
-        string[] tickLabels = { "0.5", "1", "2", "5", "10", "∞" };
-        float[] tickValues = { 0.5f, 1f, 2f, 5f, 10f, 1000f };
-        for (int i = 0; i < tickLabels.Length; i++)
+        for (int i = 0; i < 6; i++)
         {
-            float t = CAMCOLCameraSettingsTMPDisplay.NormalizeLog(tickValues[i], FocusMin, FocusMax);
-            float y = (t - 0.5f) * LensTravel;
-            AddLabel(focus.transform, "Tick_" + i, tickLabels[i], font, new Vector2(-15f, y), 11f);
+            float y = (i / 5f - 0.5f) * LensTravel;
+            AddLabel(focus.transform, "Tick_" + i, string.Empty, font, new Vector2(-15f, y), 11f);
         }
 
         // ---- Wire the created widgets into the driver ----

@@ -120,10 +120,13 @@ public class CAMCOLCameraSettingsEditor : Editor
 
         float min = Mathf.Max(0.1f, focusClearRangeLimits.vector2Value.x);
         float max = Mathf.Max(min, focusClearRangeLimits.vector2Value.y);
-        focusClearRange.floatValue = EditorGUILayout.Slider("Focus Clear Range", Mathf.Clamp(focusClearRange.floatValue, min, max), min, max);
-        float near = Mathf.Max(0.1f, focusDistance.floatValue - focusClearRange.floatValue * 0.5f);
-        float far = focusDistance.floatValue + focusClearRange.floatValue * 0.5f;
-        EditorGUILayout.LabelField("Clear Zone", $"{near:0.##} m - {far:0.##} m");
+        focusClearRange.floatValue = EditorGUILayout.Slider("Focus Range Tuning", Mathf.Clamp(focusClearRange.floatValue, min, max), min, max);
+        serializedObject.ApplyModifiedProperties();
+        CAMCOLCameraSettings settings = (CAMCOLCameraSettings)target;
+        EditorGUILayout.LabelField("Tuning Multiplier", $"{Mathf.Max(0.01f, focusClearRange.floatValue / 2f):0.##}x");
+        EditorGUILayout.LabelField("Physical Clear Range", $"{settings.EffectiveFocusClearRange:0.##} m");
+        EditorGUILayout.LabelField("Clear Zone", $"{settings.EffectiveFocusNearDistance:0.##} m - {settings.EffectiveFocusFarDistance:0.##} m");
+        serializedObject.Update();
     }
 
     private void DrawExposureCompensation()

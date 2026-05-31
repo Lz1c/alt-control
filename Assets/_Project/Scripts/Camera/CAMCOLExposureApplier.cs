@@ -300,6 +300,8 @@ public class CAMCOLExposureApplier : MonoBehaviour
         Shader.SetGlobalFloat("_SimulatedLuminanceExposureSoftness", 0.24f);
         Shader.SetGlobalFloat("_SimulatedFocusDistance", 10f);
         Shader.SetGlobalFloat("_SimulatedFocusClearRange", DefaultFocusClearRange);
+        Shader.SetGlobalFloat("_SimulatedFocusNearDistance", 9f);
+        Shader.SetGlobalFloat("_SimulatedFocusFarDistance", 11f);
         Shader.SetGlobalFloat("_SimulatedFocusBlurStrength", 0f);
         Shader.SetGlobalFloat("_SimulatedFocusBlurRadius", 0f);
         Shader.SetGlobalFloat("_SimulatedFocusBokehHighlightBoost", 0f);
@@ -338,14 +340,19 @@ public class CAMCOLExposureApplier : MonoBehaviour
         float focusDistance = GetCurrentFocusDistance();
         float focalLength = GetCurrentFocalLength();
         float aperture = Mathf.Max(0.1f, settings.Aperture);
+        float effectiveFocusClearRange = Mathf.Max(0.1f, settings.EffectiveFocusClearRange);
+        float effectiveFocusNearDistance = Mathf.Max(0.1f, settings.EffectiveFocusNearDistance);
+        float effectiveFocusFarDistance = Mathf.Max(effectiveFocusNearDistance, settings.EffectiveFocusFarDistance);
         float apertureBlur = Mathf.Clamp(BaseAperture / aperture, 0.05f, 6f);
         float focalLengthBlur = Mathf.Clamp(focalLength / DefaultFocalLength, 0.25f, 4f);
-        float focusRangeBlur = Mathf.Clamp(DefaultFocusClearRange / Mathf.Max(0.1f, settings.FocusClearRange), 0.2f, 4f);
+        float focusRangeBlur = Mathf.Clamp(DefaultFocusClearRange / effectiveFocusClearRange, 0.2f, 4f);
         float blurStrength = Mathf.Clamp(apertureBlur * focalLengthBlur * focusRangeBlur, 0f, 8f);
         float bokehHighlightBoost = Mathf.Clamp((apertureBlur - 0.75f) * 1.2f, 0.5f, 4f);
 
         Shader.SetGlobalFloat("_SimulatedFocusDistance", focusDistance);
-        Shader.SetGlobalFloat("_SimulatedFocusClearRange", Mathf.Max(0.1f, settings.FocusClearRange));
+        Shader.SetGlobalFloat("_SimulatedFocusClearRange", effectiveFocusClearRange);
+        Shader.SetGlobalFloat("_SimulatedFocusNearDistance", effectiveFocusNearDistance);
+        Shader.SetGlobalFloat("_SimulatedFocusFarDistance", effectiveFocusFarDistance);
         Shader.SetGlobalFloat("_SimulatedFocusBlurStrength", blurStrength);
         Shader.SetGlobalFloat("_SimulatedFocusBlurRadius", 7f);
         Shader.SetGlobalFloat("_SimulatedFocusBokehHighlightBoost", bokehHighlightBoost);
