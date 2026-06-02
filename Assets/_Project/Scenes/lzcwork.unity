@@ -95761,6 +95761,107 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1838478273}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1841801989
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1841801990}
+  - component: {fileID: 1841801991}
+  - component: {fileID: 1841801992}
+  m_Layer: 0
+  m_Name: arduino
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1841801990
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1841801989}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -84.11117, y: 0.8139965, z: -74.82384}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1841801991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1841801989}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e2a563c1ae84430811229fbdf20b743, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  portName: COM3
+  baudRate: 115200
+  readTimeoutMilliseconds: 25
+  connectOnStart: 1
+  reconnectIfDisconnected: 1
+  reconnectIntervalSeconds: 1
+  logReceivedLines: 1
+  lastReceivedLine: 
+  onLineReceived:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &1841801992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1841801989}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edf9e0a937c147608cd34502aa49e0fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serialReader: {fileID: 1841801991}
+  settings: {fileID: 2409406712731890314}
+  prefix: KNOBS:
+  analogMin: 0
+  analogMax: 1023
+  isoMin: 100
+  isoMax: 6400
+  invertIso: 0
+  shutterSpeedMin: 0.001
+  shutterSpeedMax: 6
+  invertShutterSpeed: 0
+  apertureMin: 1
+  apertureMax: 32
+  invertAperture: 0
+  exposureCompensationMin: -3
+  exposureCompensationMax: 3
+  invertExposureCompensation: 0
+  focalLengthMin: 24
+  focalLengthMax: 70
+  invertFocalLength: 0
+  focalLengthLogScale: 1
+  focusDistanceMin: 0.2
+  focusDistanceMax: 500
+  invertFocusDistance: 0
+  focusDistanceLogScale: 1
+  logAppliedValues: 1
+  lastLine: 
+  lastA0: -1
+  lastA1: -1
+  lastA2: -1
+  lastA3: -1
+  lastA4: -1
+  lastA5: -1
 --- !u!1001 &1842553646
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -113435,7 +113536,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 35.3, y: 0}
+  m_AnchoredPosition: {x: 35.30005, y: 0}
   m_SizeDelta: {x: 60, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &2440927543900728497
@@ -119353,3 +119454,4 @@ SceneRoots:
   - {fileID: 806034361}
   - {fileID: 1000868679}
   - {fileID: 4157154526346634839}
+  - {fileID: 1841801990}
