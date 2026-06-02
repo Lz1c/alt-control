@@ -72,6 +72,112 @@ public static class VegetationScatterTool
 
     const string PrefabRoot = "Assets/PolygonNature/Prefabs/";
 
+    // ---- Circular scatter on the large round mound ------------------------------------
+    const string MoundRootName = "Vegetation_Mound_Large";
+    const string LargeMoundName = "SM_Terrain_Ground_Mound_Large_01";
+    // There are two tiles with this name; pick the instance nearest this world point (the big one).
+    static readonly Vector3 LargeMoundApproxPos = new Vector3(-100.5f, 8.36f, -34.77f);
+    const float MoundRadiusInset = 0.92f; // fraction of tile radius to fill (stay off the sloping rim)
+    const int MoundPlantTarget = 60;
+    const int MoundTreeTarget = 4;
+    const float MoundPlantSpacing = 1.8f;
+    const float MoundTreeSpacing = 5.0f;
+
+    [MenuItem("Tools/Vegetation/Scatter On Large Mound (Circle)")]
+    public static void ScatterOnLargeMound()
+    {
+        Scene scene = SceneManager.GetActiveScene();
+        if (!scene.IsValid()) { Debug.LogError("[VegetationScatter] No active scene."); return; }
+
+        // Find the intended mound instance (nearest to the known big-mound position).
+        Collider target = null;
+        float best = float.MaxValue;
+        foreach (var go in Object.FindObjectsOfType<GameObject>(true))
+        {
+            if (go.name != LargeMoundName) continue;
+            var c = go.GetComponent<Collider>();
+            if (c == null) continue;
+            float d = (go.transform.position - LargeMoundApproxPos).sqrMagnitude;
+            if (d < best) { best = d; target = c; }
+        }
+        if (target == null)
+        {
+            Debug.LogError($"[VegetationScatter] Could not find a '{LargeMoundName}' with a collider.");
+            return;
+        }
+
+        Bounds b = target.bounds;
+        Vector3 center = b.center;
+        float radius = Mathf.Min(b.extents.x, b.extents.z) * MoundRadiusInset;
+        Debug.Log($"[VegetationScatter] Large mound target at {target.transform.position}  " +
+                  $"circleCenter=({center.x:N1},{center.z:N1}) radius={radius:N1}");
+
+        GameObject prev = FindRoot(scene, MoundRootName);
+        if (prev != null) Undo.DestroyObjectImmediate(prev);
+
+        GameObject root = new GameObject(MoundRootName);
+        Undo.RegisterCreatedObjectUndo(root, "Scatter Vegetation (Mound)");
+        GameObject plantGroup = new GameObject("Plants"); plantGroup.transform.SetParent(root.transform);
+        GameObject treeGroup = new GameObject("Trees"); treeGroup.transform.SetParent(root.transform);
+
+        var placedTrees = new List<Vector3>();
+        var placedPlants = new List<Vector3>();
+        int trees = PlaceCircle(TreePrefabs, MoundTreeTarget, MoundTreeSpacing, true, target, center, radius, placedTrees, treeGroup.transform);
+        int plants = PlaceCircle(PlantPrefabs, MoundPlantTarget, MoundPlantSpacing, false, target, center, radius, placedPlants, plantGroup.transform);
+
+        EditorSceneManager.MarkSceneDirty(scene);
+        Selection.activeGameObject = root;
+        Debug.Log($"[VegetationScatter] Mound: placed {plants} plants and {trees} trees under '{MoundRootName}'.");
+    }
+
+    static int PlaceCircle(string[] prefabs, int target, float spacing, bool isTree,
+        Collider targetCol, Vector3 center, float radius, List<Vector3> placed, Transform parent)
+    {
+        int placedCount = 0, attempts = 0, maxAttempts = target * MaxAttemptsMultiplier;
+        while (placedCount < target && attempts < maxAttempts)
+        {
+            attempts++;
+            // Uniform random point inside the circle (sqrt for even area distribution).
+            float ang = Random.value * Mathf.PI * 2f;
+            float r = radius * Mathf.Sqrt(Random.value);
+            float x = center.x + r * Mathf.Cos(ang);
+            float z = center.z + r * Mathf.Sin(ang);
+            Vector3 origin = new Vector3(x, center.y + 50f, z);
+
+            if (!Physics.Raycast(origin, Vector3.down, out RaycastHit hit, 200f, ~0, QueryTriggerInteraction.Ignore))
+                continue;
+            if (hit.collider != targetCol) continue;        // must be THIS mound, nothing on top
+            if (hit.normal.y < MaxSlopeDot) continue;
+
+            Vector3 p = hit.point;
+            if (TooClose(p, placed, spacing)) continue;
+
+            string rel = prefabs[Random.Range(0, prefabs.Length)];
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabRoot + rel + ".prefab");
+            if (prefab == null) { Debug.LogWarning($"[VegetationScatter] Missing prefab: {rel}"); continue; }
+
+            GameObject inst = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
+            inst.transform.position = p;
+            float yaw = Random.Range(0f, 360f);
+            if (isTree)
+            {
+                inst.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+                float s = Random.Range(0.85f, 1.35f);
+                inst.transform.localScale = new Vector3(s, s, s);
+            }
+            else
+            {
+                inst.transform.rotation = Quaternion.Euler(Random.Range(-6f, 6f), yaw, Random.Range(-6f, 6f));
+                float s = Random.Range(0.8f, 1.3f);
+                inst.transform.localScale = new Vector3(s, s, s);
+            }
+            Undo.RegisterCreatedObjectUndo(inst, "Scatter Vegetation (Mound)");
+            placed.Add(p);
+            placedCount++;
+        }
+        return placedCount;
+    }
+
     [MenuItem("Tools/Vegetation/Scatter On Ground")]
     public static void Scatter()
     {
