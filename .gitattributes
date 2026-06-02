@@ -1,0 +1,87 @@
+# ---------------------------------------------------------------------------
+# Line-ending normalization for this Unity project.
+# Text files are stored and checked out as LF everywhere, so Windows no longer
+# reports "LF will be replaced by CRLF". Binary assets are never touched.
+# ---------------------------------------------------------------------------
+
+# Auto-detect text files; keep LF in both the repo and the working tree.
+* text=auto eol=lf
+
+# --- Source / config (text) ---
+*.cs            text diff=csharp eol=lf
+*.shader        text eol=lf
+*.cginc         text eol=lf
+*.hlsl          text eol=lf
+*.compute       text eol=lf
+*.uss           text eol=lf
+*.uxml          text eol=lf
+*.json          text eol=lf
+*.txt           text eol=lf
+*.md            text eol=lf
+*.xml           text eol=lf
+*.yml           text eol=lf
+*.yaml          text eol=lf
+*.asmdef        text eol=lf
+*.asmref        text eol=lf
+
+# --- Unity YAML assets (text) ---
+*.meta          text eol=lf
+*.unity         text eol=lf
+*.asset         text eol=lf
+*.prefab        text eol=lf
+*.mat           text eol=lf
+*.anim          text eol=lf
+*.controller    text eol=lf
+*.overrideController text eol=lf
+*.physicMaterial text eol=lf
+*.physicsMaterial2D text eol=lf
+*.lighting      text eol=lf
+*.playable      text eol=lf
+*.spriteatlas   text eol=lf
+*.guiskin       text eol=lf
+*.fontsettings  text eol=lf
+*.mixer         text eol=lf
+*.renderTexture text eol=lf
+*.flare         text eol=lf
+*.brush         text eol=lf
+*.terrainlayer  text eol=lf
+*.signal        text eol=lf
+
+# --- Binary assets: never apply line-ending or text diffs ---
+*.fbx           binary
+*.FBX           binary
+*.obj           binary
+*.blend         binary
+*.dae           binary
+*.3ds           binary
+*.max           binary
+*.c4d           binary
+*.png           binary
+*.jpg           binary
+*.jpeg          binary
+*.gif           binary
+*.bmp           binary
+*.tga           binary
+*.tif           binary
+*.tiff          binary
+*.psd           binary
+*.exr           binary
+*.hdr           binary
+*.cubemap       binary
+*.wav           binary
+*.mp3           binary
+*.ogg           binary
+*.aif           binary
+*.aiff          binary
+*.flac          binary
+*.mp4           binary
+*.mov           binary
+*.webm          binary
+*.ttf           binary
+*.otf           binary
+*.dll           binary
+*.so            binary
+*.dylib         binary
+*.a             binary
+*.bytes         binary
+*.unitypackage  binary
