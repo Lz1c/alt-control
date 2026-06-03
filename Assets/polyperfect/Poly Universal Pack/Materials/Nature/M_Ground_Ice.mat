@@ -30,6 +30,7 @@ Material:
   - _OCCLUSIONMAP
   - _PARALLAXMAP
   - _SPECGLOSSMAP
+  - _SPECULAR_SETUP
   m_InvalidKeywords:
   - _MASKMAP
   - _NORMALMAP_TANGENT_SPACE
@@ -59,7 +60,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _BaseMap:
         m_Texture: {fileID: 2800000, guid: bb66036979ecf20488b245c28f6128af, type: 3}
-        m_Scale: {x: 1, y: 1}
+        m_Scale: {x: 0.2, y: 0.2}
         m_Offset: {x: 0, y: 0}
     - _BentNormalMap:
         m_Texture: {fileID: 0}
@@ -118,8 +119,8 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
+        m_Texture: {fileID: 2800000, guid: bb66036979ecf20488b245c28f6128af, type: 3}
+        m_Scale: {x: 0.2, y: 0.2}
         m_Offset: {x: 0, y: 0}
     - _MaskMap:
         m_Texture: {fileID: 2800000, guid: 810f8b269d0765b499c198103e05bd6b, type: 3}
@@ -285,7 +286,7 @@ Material:
     - _ReceivesSSR: 1
     - _RefractionModel: 0
     - _SSRefractionProjectionModel: 0
-    - _Smoothness: 0.664
+    - _Smoothness: 1
     - _SmoothnessRemapMax: 0.5696436
     - _SmoothnessRemapMin: 0
     - _SmoothnessTextureChannel: 0
@@ -326,7 +327,7 @@ Material:
     - _UVSec: 0
     - _UseEmissiveIntensity: 0
     - _UseShadowThreshold: 0
-    - _WorkflowMode: 1
+    - _WorkflowMode: 0
     - _ZTestDepthEqualForOpaque: 3
     - _ZTestGBuffer: 4
     - _ZTestModeDistortion: 4
@@ -351,7 +352,7 @@ Material:
     - _UVMappingMask: {r: 1, g: 0, b: 0, a: 0}
     - _UVMappingMaskEmissive: {r: 1, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
---- !u!114 &2626707084536683335
+--- !u!114 &5915245614197397518
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
