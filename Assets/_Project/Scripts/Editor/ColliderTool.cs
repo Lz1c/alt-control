@@ -115,6 +115,59 @@ public static class ColliderTool
         foreach (var kv in byRoot) Debug.Log($"[ColliderTool]   {kv.Key}: {kv.Value}");
     }
 
+    [MenuItem("Tools/Colliders/Clean Vegetation Colliders")]
+    public static void CleanVegetation()
+    {
+        Scene scene = SceneManager.GetActiveScene();
+        string[] vegRoots = { "Vegetation_Scatter", "Vegetation_Mound_Large", "Vegetation_GrassMounds" };
+        int removed = 0;
+        foreach (string r in vegRoots)
+        {
+            GameObject go = Find(scene, r);
+            if (go == null) continue;
+            foreach (Collider c in go.GetComponentsInChildren<Collider>(true))
+            {
+                Undo.DestroyObjectImmediate(c);
+                removed++;
+            }
+        }
+        EditorSceneManager.MarkSceneDirty(scene);
+        Debug.Log($"[ColliderTool] Removed {removed} stray collider(s) from Vegetation_* groups (foliage should have none).");
+    }
+
+    [MenuItem("Tools/Colliders/Clean Stray Capsule Spheres")]
+    public static void CleanStrayCapsules()
+    {
+        Scene scene = SceneManager.GetActiveScene();
+        int removed = 0; var notes = new List<string>();
+        var all = new List<CapsuleCollider>();
+        foreach (GameObject root in scene.GetRootGameObjects())
+            all.AddRange(root.GetComponentsInChildren<CapsuleCollider>(true));
+
+        foreach (CapsuleCollider cap in all)
+        {
+            if (cap == null) continue;
+            GameObject go = cap.gameObject;
+            if (RootName(go.transform) == "Prototype_FPC") continue; // never touch the player
+
+            bool noMesh = go.GetComponent<MeshFilter>() == null;
+            Vector3 ls = go.transform.lossyScale;
+            float worldRadius = cap.radius * Mathf.Max(Mathf.Abs(ls.x), Mathf.Abs(ls.z));
+            bool oversized = worldRadius > 2.5f;
+
+            if (noMesh || oversized)
+            {
+                if (notes.Count < 20) notes.Add($"{RootName(go.transform)}/{go.name} r={worldRadius:N1} noMesh={noMesh}");
+                Undo.DestroyObjectImmediate(cap);
+                removed++;
+            }
+        }
+        EditorSceneManager.MarkSceneDirty(scene);
+        Debug.Log($"[ColliderTool] Removed {removed} stray/oversized capsule(s). e.g.: {string.Join(" | ", notes)}");
+    }
+
+
+
     static GameObject Find(Scene scene, string name)
     {
         foreach (GameObject go in scene.GetRootGameObjects()) if (go.name == name) return go;
