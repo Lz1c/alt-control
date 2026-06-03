@@ -29,7 +29,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Alpha: 1.08
+    - _Alpha: 2
     - _BreathAmount: 0.44
     - _BreathSpeed: 0.04
     - _DistortScale: 4.5
@@ -43,6 +43,10 @@ Material:
     - _EdgeNoiseSpeed: 0.45
     - _EdgeNoiseStrength: 0.3
     - _EmissionStrength: 1.4
+    - _ExposureAlphaResponse: 0.03
+    - _ExposureDarkenResponse: 0.12
+    - _ExposureMaxBoost: 1.55
+    - _ExposureResponse: 0.45
     - _FlowScale: 12
     - _FlowSpeed: 0.93
     - _MaskBias: 0.08
@@ -51,9 +55,9 @@ Material:
     - _UseColorMask: 1
     - _VerticalFade: 0.27
     m_Colors:
-    - _AuroraTint: {r: 0.65, g: 1, b: 0.86, a: 1}
+    - _AuroraTint: {r: 0.03415597, g: 0.8749342, b: 0.98742133, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _EdgeTint: {r: 0.75, g: 1, b: 0.97999996, a: 1}
-    - _SecondaryTint: {r: 0.45, g: 0.95, b: 1, a: 1}
+    - _EdgeTint: {r: 0.380503, g: 0.8651256, b: 1, a: 1}
+    - _SecondaryTint: {r: 0, g: 0.85944986, b: 1, a: 1}
     - _Tint: {r: 0.65, g: 1, b: 0.86, a: 1}
   m_BuildTextureStacks: []
